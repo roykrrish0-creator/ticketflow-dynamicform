@@ -1,0 +1,253 @@
+<!-- Loading States -->
+<div *ngIf="ticketOperation.isLoading || schemaOperation.isLoading" class="loading-container">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p class="loading-text">Loading ticket details...</p>
+</div>
+
+<!-- Main Content -->
+<div *ngIf="!ticketOperation.isLoading && !schemaOperation.isLoading" class="ticket-detail-container">
+  
+  <!-- Header section -->
+  <div class="ticket-header">
+    <div class="header-content">
+      <!-- Back Button (First) -->
+      <button mat-button class="back-btn" routerLink="/tickets">
+        <mat-icon>arrow_back</mat-icon>
+        Back To Tickets
+      </button>
+      
+      <!-- Main Header Info (Center) -->
+      <div class="header-center">
+        <h1 class="page-title">{{ formSchema?.title || 'Employee Onboarding - John Smith' }}</h1>
+        <div class="header-meta">
+          <span class="status-badge in-progress">In Progress</span>
+          <span class="meta-item">Created Jan 15, 2024</span>
+        </div>
+      </div>
+      
+      <!-- Action Buttons (Right) -->
+      <div class="header-actions">
+        <button mat-stroked-button class="cancel-btn" (click)="onCancel()">
+          Cancel
+        </button>
+        <button mat-stroked-button color="primary" class="reassign-btn" (click)="handleReassign()">
+          <mat-icon>person</mat-icon>
+          Reassign
+        </button>
+        <button mat-raised-button color="primary" class="save-btn" (click)="onSubmit()">
+          <mat-icon *ngIf="!isSaving">save</mat-icon>
+          <mat-icon *ngIf="isSaving" class="spinning">hourglass_empty</mat-icon>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Layout Grid -->
+  <div class="main-layout" [class.mobile-layout]="isMobileView">
+    
+    <!-- Form Section (Left Panel) -->
+    <div class="form-section" #formContainer>
+      <!-- Dynamic Form Container -->
+      <div class="form-content" *ngIf="dynamicForm && formSchema" [formGroup]="dynamicForm">
+        <!-- Form sections as expansion panels -->
+        <div class="form-cards">
+          <div 
+            *ngFor="let section of formSchema.sections; let i = index; trackBy: trackBySection"
+            class="form-section-card">
+            <mat-expansion-panel 
+              class="form-expansion-panel"
+              [expanded]="i === 0">
+              
+              <!-- Section Header -->
+              <mat-expansion-panel-header class="form-section-header">
+                <mat-panel-title class="form-section-title">
+                  <mat-icon class="form-section-icon">{{ getSectionIcon(section.id) }}</mat-icon>
+                  <span class="form-section-title-text">{{ section.title }}</span>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              
+              <!-- Section Content -->
+              <div class="form-section-content">
+                <div class="info-rows">
+                  <div 
+                    *ngFor="let field of section.fields; trackBy: trackByFieldId"
+                    class="info-row">
+                    <div class="info-label">{{field.label}}</div>
+                    <div class="info-value">
+                      <!-- Display field values based on type -->
+                      <ng-container *ngIf="field.type === 'text' || field.type === 'number'">
+                        {{ field.default || '-' }}
+                      </ng-container>
+                      
+                      <ng-container *ngIf="field.type === 'textarea'">
+                        <div class="textarea-value">
+                          {{ field.default || '-' }}
+                        </div>
+                      </ng-container>
+                      
+                      <ng-container *ngIf="field.type === 'select'">
+                        {{ getSelectOptionLabel(field, field.default) }}
+                      </ng-container>
+                      
+                      <ng-container *ngIf="field.type === 'radio'">
+                        {{ getRadioOptionLabel(field, field.default) }}
+                      </ng-container>
+                      
+                      <ng-container *ngIf="field.type === 'date'">
+                        {{ formatDate(field.default) }}
+                      </ng-container>
+                      
+                      <ng-container *ngIf="field.type === 'checkbox'">
+                        <mat-icon class="checkbox-icon" [class.checked]="field.default">
+                          {{ field.default ? 'check_box' : 'check_box_outline_blank' }}
+                        </mat-icon>
+                      </ng-container>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Form Error State -->
+      <div *ngIf="schemaOperation.error" class="error-state">
+        <mat-icon class="error-icon">error</mat-icon>
+        <h3>Failed to Load Form</h3>
+        <p>{{ schemaOperation.error }}</p>
+        <button mat-raised-button color="primary" (click)="loadTicketData()">
+          Retry
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Section (Right Panel) -->
+    <div class="summary-section" 
+         #summaryContainer
+         [class.mobile-drawer]="isMobileView"
+         [class.show-drawer]="showSummaryDrawer && isMobileView"
+         [class.sticky]="isSummarySticky && !isMobileView">
+      
+      <app-ticket-summary [ticket]="ticket"></app-ticket-summary>
+      
+    </div>
+  </div>
+
+  <!-- Bottom Tabs Section -->
+  <div class="bottom-tabs-section" #tabsContainer>
+    <div class="tabs-header">
+      <div class="tab-buttons">
+        <button 
+          class="tab-btn" 
+          [class.active]="selectedTabIndex === 0"
+          (click)="selectedTabIndex = 0">
+          <mat-icon>comment</mat-icon>
+          Comments (3)
+        </button>
+        <button 
+          class="tab-btn" 
+          [class.active]="selectedTabIndex === 1"
+          (click)="selectedTabIndex = 1">
+          <mat-icon>history</mat-icon>
+          History (4)
+        </button>
+      </div>
+    </div>
+    
+    <div class="tab-content-wrapper">
+      <!-- Comments Tab Content -->
+      <div *ngIf="selectedTabIndex === 0" class="tab-content">
+        <div class="comments-section">
+          <!-- Comment Composer -->
+          <div class="comment-composer">
+            <div class="composer-avatar">JD</div>
+            <div class="composer-input">
+              <textarea 
+                class="comment-textarea"
+                placeholder="Add a comment..." 
+                rows="2"
+                [(ngModel)]="newComment"></textarea>
+            </div>
+          </div>
+          
+          <!-- Add Comment Button -->
+          <div class="comment-actions">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="add-comment-btn"
+              (click)="addComment()"
+              [disabled]="!newComment.trim()">
+              <mat-icon>send</mat-icon>
+              Add Comment
+            </button>
+          </div>
+          
+          <!-- Comment List -->
+          <div class="comments-list">
+            <div class="comment-item" *ngFor="let comment of mockComments; let i = index">
+              <div class="comment-avatar">{{ getCommentInitials(comment.author) }}</div>
+              <div class="comment-content">
+                <div class="comment-header">
+                  <span class="comment-author">{{ comment.author }}</span>
+                  <span class="comment-time">{{ comment.timestamp }}</span>
+                  <span 
+                    *ngIf="i === 0" 
+                    class="comment-badge latest-badge">
+                    latest
+                  </span>
+                </div>
+                <div class="comment-text">
+                  {{ comment.text }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Tab Content -->
+      <div *ngIf="selectedTabIndex === 1" class="tab-content">
+        <div class="history-section">
+          <div class="history-list">
+            <div class="history-item" *ngFor="let historyItem of mockHistory; trackBy: trackByHistoryId">
+              <div class="history-icon">
+                <mat-icon>{{ getHistoryIcon(historyItem.action) }}</mat-icon>
+              </div>
+              <div class="history-content">
+                <div class="history-header">
+                  <span class="history-action">{{ historyItem.action }}</span>
+                  <span class="history-actor">by {{ historyItem.actor }}</span>
+                  <span class="history-time">{{ historyItem.timestamp }}</span>
+                </div>
+                <div class="history-details" *ngIf="historyItem.details">
+                  {{ historyItem.details }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Mobile Summary Drawer Backdrop -->
+<div 
+  *ngIf="isMobileView && showSummaryDrawer"
+  class="drawer-backdrop"
+  (click)="toggleSummaryDrawer()">
+</div>
+
+<!-- Error State -->
+<div *ngIf="ticketOperation.error" class="error-container">
+  <mat-icon class="error-icon">error_outline</mat-icon>
+  <h2>Failed to Load Ticket</h2>
+  <p>{{ ticketOperation.error }}</p>
+  <button mat-raised-button color="primary" (click)="loadTicketData()">
+    Try Again
+  </button>
+</div>

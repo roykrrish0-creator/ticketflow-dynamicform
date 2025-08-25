@@ -1,0 +1,348 @@
+.form-section-container {
+  margin-bottom: var(--spacing-lg);
+
+  .section-panel {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    background: var(--bg-primary);
+    box-shadow: none;
+    overflow: hidden;
+
+    &::ng-deep {
+      .mat-expansion-panel-body {
+        padding: 0;
+      }
+
+      .mat-expansion-panel-header {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        background: var(--bg-section);
+        border-bottom: 1px solid var(--border-light);
+        font-weight: 600;
+        
+        &:hover {
+          background: var(--bg-hover);
+        }
+
+        &.mat-expanded {
+          background: var(--bg-section);
+          border-bottom-color: var(--border-light);
+        }
+      }
+
+      .mat-expansion-indicator {
+        color: var(--primary-blue);
+      }
+    }
+
+    .section-header {
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        font-size: var(--font-size-lg);
+        color: var(--text-primary);
+
+        .section-icon {
+          color: var(--primary-blue);
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+
+        .section-title-text {
+          font-weight: 600;
+          font-size: var(--font-size-lg);
+        }
+      }
+    }
+  }
+
+  .section-content {
+    padding: var(--spacing-xl);
+    background: var(--bg-primary);
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg) var(--spacing-xl);
+      align-items: start;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .form-field-container {
+        &.half-width {
+          // Default: takes one column
+        }
+
+        &.full-width {
+          grid-column: 1 / -1;
+        }
+
+        .form-field {
+          width: 100%;
+
+          &::ng-deep {
+            .mat-mdc-form-field-outline {
+              border-color: var(--border-medium);
+            }
+
+            .mat-mdc-form-field-focus-overlay {
+              background-color: transparent;
+            }
+
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+              border-color: var(--border-medium);
+              border-width: 1px;
+            }
+
+            &.mat-focused {
+              .mdc-notched-outline__leading,
+              .mdc-notched-outline__notch,
+              .mdc-notched-outline__trailing {
+                border-color: var(--primary-blue);
+                border-width: 2px;
+              }
+            }
+
+            .mat-mdc-form-field-label {
+              color: var(--text-secondary);
+              font-weight: 500;
+            }
+
+            &.mat-focused .mat-mdc-form-field-label {
+              color: var(--primary-blue);
+            }
+
+            .mat-mdc-input-element {
+              color: var(--text-primary);
+              font-size: var(--font-size-md);
+            }
+
+            .mat-mdc-form-field-hint {
+              color: var(--text-secondary);
+              font-size: var(--font-size-sm);
+            }
+
+            .mat-mdc-form-field-error {
+              color: var(--error);
+              font-size: var(--font-size-sm);
+            }
+          }
+        }
+
+        // Radio Group Styles
+        .radio-group {
+          width: 100%;
+
+          .field-label {
+            display: block;
+            font-size: var(--font-size-md);
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+          }
+
+          .radio-group-content {
+            display: flex;
+            gap: var(--spacing-lg);
+            flex-wrap: wrap;
+
+            .radio-option {
+              &::ng-deep {
+                .mat-radio-label {
+                  color: var(--text-primary);
+                  font-size: var(--font-size-md);
+                }
+
+                .mat-radio-button .mat-radio-ripple {
+                  left: calc(50% - 20px);
+                  top: calc(50% - 20px);
+                }
+
+                .mat-radio-container {
+                  .mat-radio-outer-circle {
+                    border-color: var(--border-strong);
+                  }
+
+                  .mat-radio-inner-circle {
+                    background-color: var(--primary-blue);
+                  }
+                }
+
+                &.mat-radio-checked {
+                  .mat-radio-container {
+                    .mat-radio-outer-circle {
+                      border-color: var(--primary-blue);
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          .field-hint {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-sm);
+          }
+
+          .field-error {
+            color: var(--error);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-sm);
+          }
+        }
+
+        // Checkbox Styles
+        .checkbox-field {
+          width: 100%;
+          
+          &::ng-deep {
+            .mat-checkbox {
+              .mat-checkbox-label {
+                color: var(--text-primary);
+                font-size: var(--font-size-md);
+              }
+
+              .mat-checkbox-frame {
+                border-color: var(--border-strong);
+              }
+
+              &.mat-checkbox-checked {
+                .mat-checkbox-background {
+                  background-color: var(--primary-blue);
+                }
+              }
+            }
+          }
+
+          .field-hint {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-sm);
+            margin-left: 32px; // Align with checkbox text
+          }
+        }
+      }
+    }
+  }
+}
+
+// Special styling for first section (usually expanded by default)
+.form-section-container:first-child {
+  .section-panel {
+    &::ng-deep {
+      .mat-expansion-panel-header.mat-expanded {
+        background: var(--primary-blue);
+        color: white;
+
+        .section-icon {
+          color: white;
+        }
+
+        .mat-expansion-indicator::after {
+          color: white;
+        }
+
+        &:hover {
+          background: var(--primary-blue-dark);
+        }
+      }
+    }
+  }
+}
+
+// Error state styling
+.form-field-container.has-error {
+  .form-field {
+    &::ng-deep {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--error);
+      }
+
+      .mat-mdc-form-field-label {
+        color: var(--error);
+      }
+    }
+  }
+}
+
+// Disabled state styling
+.form-field-container.is-disabled {
+  .form-field {
+    &::ng-deep {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--border-light);
+      }
+
+      .mat-mdc-form-field-label,
+      .mat-mdc-input-element {
+        color: var(--text-disabled);
+      }
+    }
+  }
+}
+
+// Animation for smooth expand/collapse
+.section-panel {
+  &::ng-deep {
+    .mat-expansion-panel-content {
+      .mat-expansion-panel-body {
+        animation: slideDown 0.3s ease-out;
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .form-section-container {
+    .section-panel {
+      border: 2px solid var(--text-primary);
+      
+      &::ng-deep {
+        .mat-expansion-panel-header {
+          border-bottom: 2px solid var(--text-primary);
+        }
+      }
+    }
+  }
+}
+
+// Reduced motion preferences
+@media (prefers-reduced-motion: reduce) {
+  .section-panel {
+    &::ng-deep {
+      .mat-expansion-panel-content .mat-expansion-panel-body {
+        animation: none;
+      }
+    }
+  }
+
+  @keyframes slideDown {
+    from, to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
