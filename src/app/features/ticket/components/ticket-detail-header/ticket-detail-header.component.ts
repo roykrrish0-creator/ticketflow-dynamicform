@@ -85,7 +85,7 @@ import { Ticket } from '../../../../shared/models/ticket.interface';
             class="header-action-btn reassign"
             (click)="onReassign.emit()"
             [attr.aria-label]="'Reassign ticket ' + ticket?.id">
-            <mat-icon>person_add</mat-icon>
+            <mat-icon>person_add_alt_1</mat-icon>
             <span class="btn-text">Reassign</span>
           </button>
 
@@ -98,7 +98,7 @@ import { Ticket } from '../../../../shared/models/ticket.interface';
             (click)="onSave.emit()"
             [attr.aria-label]="'Save changes to ticket ' + ticket?.id">
             <mat-icon *ngIf="!isSaving">save</mat-icon>
-            <mat-icon *ngIf="isSaving" class="spinning">hourglass_empty</mat-icon>
+            <mat-icon *ngIf="isSaving" class="spinning">sync</mat-icon>
             <span class="btn-text">{{ isSaving ? 'Saving...' : 'Save Changes' }}</span>
           </button>
         </div>
@@ -128,7 +128,7 @@ export class TicketDetailHeaderComponent {
       case 'in_progress':
         return 'schedule';
       case 'pending':
-        return 'pause_circle';
+        return 'pause_circle_outline';
       case 'resolved':
         return 'check_circle';
       case 'closed':

@@ -1,134 +1,175 @@
 <!-- Loading States -->
-<div *ngIf="ticketOperation.isLoading || schemaOperation.isLoading" class="loading-container">
+<div *ngIf="ticketOperation.isLoading || schemaOperation.isLoading" 
+     class="flex flex-col items-center justify-center h-screen gap-4">
   <mat-spinner diameter="50"></mat-spinner>
-  <p class="loading-text">Loading ticket details...</p>
+  <p class="text-gray-500 text-base">Loading ticket details...</p>
 </div>
 
 <!-- Main Content -->
-<div *ngIf="!ticketOperation.isLoading && !schemaOperation.isLoading" class="ticket-detail-container">
+<div *ngIf="!ticketOperation.isLoading && !schemaOperation.isLoading" 
+     class="bg-gray-50 min-h-screen">
   
   <!-- Header section -->
-  <div class="ticket-header">
-    <div class="header-content">
-      <!-- Back Button (First) -->
-      <button mat-button class="back-btn" routerLink="/tickets">
-        <mat-icon>arrow_back</mat-icon>
-        Back To Tickets
+  <div class="bg-white border-b border-gray-200 px-6 py-3 m-1 rounded-lg sticky top-0 z-50 shadow-md">
+    <div class="flex items-center gap-4">
+      <!-- Back Button (First) - MD3 Text Button -->
+      <button mat-button 
+              class="md-text-button"
+              routerLink="/tickets">
+        <mat-icon class="md-button-icon" aria-hidden="true">arrow_back</mat-icon>
+        <span class="md-button-label">Back to tickets</span>
       </button>
       
       <!-- Main Header Info (Center) -->
-      <div class="header-center">
-        <h1 class="page-title">{{ formSchema?.title || 'Employee Onboarding - John Smith' }}</h1>
-        <div class="header-meta">
-          <span class="status-badge in-progress">In Progress</span>
-          <span class="meta-item">Created Jan 15, 2024</span>
+      <div class="flex-1">
+        <h1 class="text-lg font-semibold mb-1 text-gray-900">{{ formSchema?.title || 'Employee Onboarding - John Smith' }}</h1>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            In Progress
+          </span>
+          <span class="text-gray-500 text-xs">Created Jan 15, 2024</span>
         </div>
       </div>
       
-      <!-- Action Buttons (Right) -->
-      <div class="header-actions">
-        <button mat-stroked-button class="cancel-btn" (click)="onCancel()">
-          Cancel
-        </button>
-        <button mat-stroked-button color="primary" class="reassign-btn" (click)="handleReassign()">
-          <mat-icon>person</mat-icon>
-          Reassign
-        </button>
-        <button mat-raised-button color="primary" class="save-btn" (click)="onSubmit()">
-          <mat-icon *ngIf="!isSaving">save</mat-icon>
-          <mat-icon *ngIf="isSaving" class="spinning">hourglass_empty</mat-icon>
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
-        </button>
+      <!-- Action Buttons Layout -->
+      <div class="flex justify-between items-center gap-4 flex-shrink-0">
+        <!-- Left Side Actions -->
+        <div class="flex items-center">
+          <!-- Reassign Button - MD3 Tonal Button -->
+          <button mat-flat-button 
+                  class="md-tonal-button"
+                  (click)="handleReassign()">
+            <mat-icon class="md-button-icon" aria-hidden="true">person_pin</mat-icon>
+            <span class="md-button-label">Reassign</span>
+          </button>
+        </div>
+
+        <!-- Right Side Actions -->
+        <div class="flex items-center">
+          <!-- Read-only Mode Buttons -->
+          <ng-container *ngIf="!isEditMode">
+            <!-- Edit Button - MD3 Filled Button -->
+            <button mat-flat-button 
+                    color="primary" 
+                    class="md-filled-button"
+                    (click)="enterEditMode()">
+              <mat-icon class="md-button-icon" aria-hidden="true">edit</mat-icon>
+              <span class="md-button-label">Edit</span>
+            </button>
+          </ng-container>
+
+          <!-- Edit Mode - Material Design Split Button -->
+          <ng-container *ngIf="isEditMode">
+            <div class="md-split-button" role="group" [attr.aria-label]="'Save actions'">
+              <!-- Primary Action Button -->
+              <button mat-flat-button 
+                      color="primary"
+                      class="md-split-primary"
+                      [disabled]="!canSave || isSaving"
+                      (click)="handleSaveChanges()"
+                      [attr.aria-describedby]="'save-button-description'">
+                <mat-icon *ngIf="!isSaving" 
+                          class="md-button-icon" 
+                          aria-hidden="true">save</mat-icon>
+                <mat-icon *ngIf="isSaving" 
+                          class="md-button-icon md-icon-loading" 
+                          aria-hidden="true">sync</mat-icon>
+                <span class="md-button-label">
+                  {{ isSaving ? 'Saving...' : 'Save changes' }}
+                </span>
+              </button>
+              
+              <!-- Secondary Action Button (Menu Trigger) -->
+              <button mat-flat-button 
+                      color="primary"
+                      class="md-split-secondary"
+                      [matMenuTriggerFor]="splitButtonMenu"
+                      [disabled]="isSaving"
+                      aria-label="More save options"
+                      [attr.aria-expanded]="false"
+                      [attr.aria-haspopup]="true">
+                <mat-icon class="md-dropdown-icon" 
+                          aria-hidden="true">arrow_drop_down</mat-icon>
+              </button>
+              
+              <!-- Material Design Menu -->
+              <mat-menu #splitButtonMenu="matMenu" 
+                        class="md-split-menu"
+                        [xPosition]="'after'"
+                        [yPosition]="'below'"
+                        [overlapTrigger]="false">
+                <button mat-menu-item 
+                        (click)="handleCancel()"
+                        class="md-menu-item">
+                  <mat-icon class="md-menu-icon" aria-hidden="true">cancel</mat-icon>
+                  <span class="md-menu-label">Cancel changes</span>
+                </button>
+              </mat-menu>
+              
+              <!-- Screen reader description -->
+              <div id="save-button-description" class="sr-only">
+                Save changes to the current ticket. Use the dropdown for additional options.
+              </div>
+            </div>
+          </ng-container>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Main Layout Grid -->
-  <div class="main-layout" [class.mobile-layout]="isMobileView">
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_320px] gap-6 min-h-0 p-6"
+       [class.grid-cols-1]="isMobileView">
     
     <!-- Form Section (Left Panel) -->
-    <div class="form-section" #formContainer>
+    <div class="bg-gray-50 min-h-0" #formContainer>
       <!-- Dynamic Form Container -->
-      <div class="form-content" *ngIf="dynamicForm && formSchema" [formGroup]="dynamicForm">
+      <div class="bg-gray-50" *ngIf="dynamicForm && formSchema" [formGroup]="dynamicForm">
         <!-- Form sections as expansion panels -->
-        <div class="form-cards">
-          <div 
-            *ngFor="let section of formSchema.sections; let i = index; trackBy: trackBySection"
-            class="form-section-card">
-            <mat-expansion-panel 
-              class="form-expansion-panel"
-              [expanded]="i === 0">
-              
-              <!-- Section Header -->
-              <mat-expansion-panel-header class="form-section-header">
-                <mat-panel-title class="form-section-title">
-                  <mat-icon class="form-section-icon">{{ getSectionIcon(section.id) }}</mat-icon>
-                  <span class="form-section-title-text">{{ section.title }}</span>
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              
-              <!-- Section Content -->
-              <div class="form-section-content">
-                <div class="info-rows">
-                  <div 
-                    *ngFor="let field of section.fields; trackBy: trackByFieldId"
-                    class="info-row">
-                    <div class="info-label">{{field.label}}</div>
-                    <div class="info-value">
-                      <!-- Display field values based on type -->
-                      <ng-container *ngIf="field.type === 'text' || field.type === 'number'">
-                        {{ field.default || '-' }}
-                      </ng-container>
-                      
-                      <ng-container *ngIf="field.type === 'textarea'">
-                        <div class="textarea-value">
-                          {{ field.default || '-' }}
-                        </div>
-                      </ng-container>
-                      
-                      <ng-container *ngIf="field.type === 'select'">
-                        {{ getSelectOptionLabel(field, field.default) }}
-                      </ng-container>
-                      
-                      <ng-container *ngIf="field.type === 'radio'">
-                        {{ getRadioOptionLabel(field, field.default) }}
-                      </ng-container>
-                      
-                      <ng-container *ngIf="field.type === 'date'">
-                        {{ formatDate(field.default) }}
-                      </ng-container>
-                      
-                      <ng-container *ngIf="field.type === 'checkbox'">
-                        <mat-icon class="checkbox-icon" [class.checked]="field.default">
-                          {{ field.default ? 'check_box' : 'check_box_outline_blank' }}
-                        </mat-icon>
-                      </ng-container>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </mat-expansion-panel>
+        <div class="flex flex-col gap-4">
+          <div *ngFor="let section of formSchema.sections; let i = index; trackBy: trackBySection"
+               class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-shadow hover:shadow-md hover:border-blue-200">
+            
+            <!-- Use the form-section component for dynamic form rendering -->
+            <app-form-section 
+              [section]="section" 
+              [formGroup]="getSectionFormGroup(section.id)"
+              [sectionIndex]="i">
+            </app-form-section>
+            
           </div>
         </div>
       </div>
       
       <!-- Form Error State -->
-      <div *ngIf="schemaOperation.error" class="error-state">
-        <mat-icon class="error-icon">error</mat-icon>
-        <h3>Failed to Load Form</h3>
-        <p>{{ schemaOperation.error }}</p>
-        <button mat-raised-button color="primary" (click)="loadTicketData()">
+      <div *ngIf="schemaOperation.error" 
+           class="flex flex-col items-center justify-center p-8 text-center gap-4">
+        <mat-icon class="!text-5xl text-red-500 mb-4">error_outline</mat-icon>
+        <h3 class="text-gray-900 font-semibold text-lg">Failed to Load Form</h3>
+        <p class="text-gray-500 text-sm">{{ schemaOperation.error }}</p>
+        <button mat-raised-button 
+                color="primary" 
+                class="mt-2"
+                (click)="loadTicketData()">
           Retry
         </button>
       </div>
     </div>
 
     <!-- Summary Section (Right Panel) -->
-    <div class="summary-section" 
-         #summaryContainer
-         [class.mobile-drawer]="isMobileView"
-         [class.show-drawer]="showSummaryDrawer && isMobileView"
-         [class.sticky]="isSummarySticky && !isMobileView">
+    <div class="bg-white w-full h-fit max-h-[calc(100vh-200px)] overflow-y-auto lg:sticky lg:top-6" 
+         [class.fixed]="isMobileView && showSummaryDrawer"
+         [class.top-0]="isMobileView && showSummaryDrawer"
+         [class.right-0]="isMobileView && showSummaryDrawer"
+         [class.w-80]="isMobileView && showSummaryDrawer"
+         [class.h-screen]="isMobileView && showSummaryDrawer"
+         [class.z-50]="isMobileView && showSummaryDrawer"
+         [class.shadow-lg]="isMobileView && showSummaryDrawer"
+         [class.-right-full]="isMobileView && !showSummaryDrawer"
+         [class.transition-all]="isMobileView"
+         [class.duration-300]="isMobileView"
+         [class.ease-in-out]="isMobileView"
+         #summaryContainer>
       
       <app-ticket-summary [ticket]="ticket"></app-ticket-summary>
       
@@ -136,70 +177,73 @@
   </div>
 
   <!-- Bottom Tabs Section -->
-  <div class="bottom-tabs-section" #tabsContainer>
-    <div class="tabs-header">
-      <div class="tab-buttons">
-        <button 
-          class="tab-btn" 
-          [class.active]="selectedTabIndex === 0"
-          (click)="selectedTabIndex = 0">
-          <mat-icon>comment</mat-icon>
+  <div class="bg-white border border-gray-200 m-6 p-6 rounded-xl shadow-sm overflow-hidden h-fit" #tabsContainer>
+    <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+      <div class="flex gap-0">
+        <button class="flex items-center gap-2 px-4 py-2 bg-transparent border-none text-gray-500 text-sm font-normal cursor-pointer border-b-2 border-transparent transition-all hover:text-blue-500" 
+                [class.!text-blue-500]="selectedTabIndex === 0"
+                [class.!border-blue-500]="selectedTabIndex === 0"
+                [class.!font-medium]="selectedTabIndex === 0"
+                (click)="selectedTabIndex = 0">
+          <mat-icon class="!text-base !w-4 !h-4">chat_bubble_outline</mat-icon>
           Comments (3)
         </button>
-        <button 
-          class="tab-btn" 
-          [class.active]="selectedTabIndex === 1"
-          (click)="selectedTabIndex = 1">
-          <mat-icon>history</mat-icon>
+        <button class="flex items-center gap-2 px-4 py-2 bg-transparent border-none text-gray-500 text-sm font-normal cursor-pointer border-b-2 border-transparent transition-all hover:text-blue-500"
+                [class.!text-blue-500]="selectedTabIndex === 1"
+                [class.!border-blue-500]="selectedTabIndex === 1"
+                [class.!font-medium]="selectedTabIndex === 1"
+                (click)="selectedTabIndex = 1">
+          <mat-icon class="!text-base !w-4 !h-4">schedule</mat-icon>
           History (4)
         </button>
       </div>
     </div>
     
-    <div class="tab-content-wrapper">
+    <div class="">
       <!-- Comments Tab Content -->
-      <div *ngIf="selectedTabIndex === 0" class="tab-content">
-        <div class="comments-section">
+      <div *ngIf="selectedTabIndex === 0" class="p-0">
+        <div class="">
           <!-- Comment Composer -->
-          <div class="comment-composer">
-            <div class="composer-avatar">JD</div>
-            <div class="composer-input">
-              <textarea 
-                class="comment-textarea"
-                placeholder="Add a comment..." 
-                rows="2"
-                [(ngModel)]="newComment"></textarea>
+          <div class="flex gap-3 mb-6">
+            <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
+              JD
+            </div>
+            <div class="flex-1">
+              <textarea class="w-full min-h-[60px] p-3 border border-gray-200 rounded text-sm font-normal resize-y bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white placeholder:text-gray-500"
+                        placeholder="Add a comment..." 
+                        rows="2"
+                        [(ngModel)]="newComment"></textarea>
             </div>
           </div>
           
-          <!-- Add Comment Button -->
-          <div class="comment-actions">
-            <button 
-              mat-raised-button 
-              color="primary" 
-              class="add-comment-btn"
-              (click)="addComment()"
-              [disabled]="!newComment.trim()">
-              <mat-icon>send</mat-icon>
-              Add Comment
+          <!-- Add Comment Button - MD3 Filled Button -->
+          <div class="flex justify-end mb-6 pt-4">
+            <button mat-flat-button 
+                    color="primary" 
+                    class="md-filled-button"
+                    (click)="addComment()"
+                    [disabled]="!newComment.trim()">
+              <mat-icon class="md-button-icon" aria-hidden="true">add_comment</mat-icon>
+              <span class="md-button-label">Add comment</span>
             </button>
           </div>
           
           <!-- Comment List -->
-          <div class="comments-list">
-            <div class="comment-item" *ngFor="let comment of mockComments; let i = index">
-              <div class="comment-avatar">{{ getCommentInitials(comment.author) }}</div>
-              <div class="comment-content">
-                <div class="comment-header">
-                  <span class="comment-author">{{ comment.author }}</span>
-                  <span class="comment-time">{{ comment.timestamp }}</span>
-                  <span 
-                    *ngIf="i === 0" 
-                    class="comment-badge latest-badge">
+          <div class="">
+            <div class="flex gap-3 mb-5 last:mb-0" *ngFor="let comment of mockComments; let i = index">
+              <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                {{ getCommentInitials(comment.author) }}
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-sm font-semibold text-gray-900">{{ comment.author }}</span>
+                  <span class="text-xs text-gray-500">{{ comment.timestamp }}</span>
+                  <span *ngIf="i === 0" 
+                        class="bg-green-500 text-white px-1.5 py-0.5 rounded-lg text-xs font-medium lowercase">
                     latest
                   </span>
                 </div>
-                <div class="comment-text">
+                <div class="text-sm text-gray-900 leading-6">
                   {{ comment.text }}
                 </div>
               </div>
@@ -209,20 +253,24 @@
       </div>
 
       <!-- History Tab Content -->
-      <div *ngIf="selectedTabIndex === 1" class="tab-content">
-        <div class="history-section">
-          <div class="history-list">
-            <div class="history-item" *ngFor="let historyItem of mockHistory; trackBy: trackByHistoryId">
-              <div class="history-icon">
-                <mat-icon>{{ getHistoryIcon(historyItem.action) }}</mat-icon>
+      <div *ngIf="selectedTabIndex === 1" class="p-0">
+        <div class="">
+          <div class="">
+            <div class="flex gap-4 py-5 border-b border-gray-200 items-start last:border-b-0" 
+                 *ngFor="let historyItem of mockHistory; trackBy: trackByHistoryId">
+              <div class="w-10 h-10 rounded-full bg-gray-100 text-blue-500 flex items-center justify-center flex-shrink-0 border border-gray-200">
+                <mat-icon class="!text-xl !w-5 !h-5">{{ getHistoryIcon(historyItem.action) }}</mat-icon>
               </div>
-              <div class="history-content">
-                <div class="history-header">
-                  <span class="history-action">{{ historyItem.action }}</span>
-                  <span class="history-actor">by {{ historyItem.actor }}</span>
-                  <span class="history-time">{{ historyItem.timestamp }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mb-2">
+                  <span class="font-semibold text-gray-900 text-base leading-tight">{{ historyItem.action }}</span>
+                  <span class="text-gray-500 text-sm font-normal">by {{ historyItem.actor }}</span>
+                  <span class="text-gray-500 text-xs font-normal md:ml-auto">
+                    {{ historyItem.timestamp }}
+                  </span>
                 </div>
-                <div class="history-details" *ngIf="historyItem.details">
+                <div *ngIf="historyItem.details" 
+                     class="text-gray-900 leading-6 text-sm mt-1 opacity-80">
                   {{ historyItem.details }}
                 </div>
               </div>
@@ -236,18 +284,58 @@
 </div>
 
 <!-- Mobile Summary Drawer Backdrop -->
-<div 
-  *ngIf="isMobileView && showSummaryDrawer"
-  class="drawer-backdrop"
-  (click)="toggleSummaryDrawer()">
+<div *ngIf="isMobileView && showSummaryDrawer"
+     class="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+     (click)="toggleSummaryDrawer()">
+</div>
+
+<!-- Confirmation Modal for Unsaved Changes -->
+<div *ngIf="showCancelConfirmation" 
+     class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200"
+     (click)="cancelDiscardChanges()">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-[90%] max-h-[90vh] overflow-hidden animate-in slide-in-from-bottom-4 zoom-in-95 duration-300" 
+       (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-900 m-0">Discard Changes?</h3>
+      <button mat-icon-button 
+              class="text-gray-500 w-10 h-10 hover:bg-gray-100"
+              (click)="cancelDiscardChanges()">
+        <mat-icon class="!text-xl !w-5 !h-5">close</mat-icon>
+      </button>
+    </div>
+    <div class="p-4 px-6 pb-6">
+      <p class="text-gray-600 text-base leading-normal m-0">
+        Your updates will not be saved. Are you sure you want to discard your changes?
+      </p>
+    </div>
+    <div class="flex gap-3 justify-end p-0 px-6 pb-6">
+      <!-- Cancel Modal Button - MD3 Text Button -->
+      <button mat-button 
+              class="md-text-button-modal"
+              (click)="cancelDiscardChanges()">
+        <span class="md-button-label">Go back</span>
+      </button>
+      <!-- Confirm Discard Button - MD3 Filled Tonal Button -->
+      <button mat-flat-button 
+              color="warn" 
+              class="md-filled-tonal-button md-warn-button"
+              (click)="confirmDiscardChanges()">
+        <span class="md-button-label">Discard changes</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Error State -->
-<div *ngIf="ticketOperation.error" class="error-container">
-  <mat-icon class="error-icon">error_outline</mat-icon>
-  <h2>Failed to Load Ticket</h2>
-  <p>{{ ticketOperation.error }}</p>
-  <button mat-raised-button color="primary" (click)="loadTicketData()">
+<div *ngIf="ticketOperation.error" 
+     class="flex flex-col items-center justify-center p-8 text-center gap-4">
+  <mat-icon class="!text-5xl text-red-500">error_outline</mat-icon>
+  <h2 class="text-gray-900 font-semibold text-xl m-0">Failed to Load Ticket</h2>
+  <p class="text-gray-500 text-base m-0">{{ ticketOperation.error }}</p>
+  <button mat-raised-button 
+          color="primary" 
+          class="mt-2"
+          (click)="loadTicketData()">
     Try Again
   </button>
 </div>

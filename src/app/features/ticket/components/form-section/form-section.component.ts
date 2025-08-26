@@ -1,6 +1,6 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { Subject, takeUntil } from 'rxjs';
 
 import { FormSection, FormField, FieldOption, FieldOptionGroup } from '../../../../shared/models';
 
@@ -31,166 +32,51 @@ import { FormSection, FormField, FieldOption, FieldOptionGroup } from '../../../
     MatIconModule,
     MatButtonModule
   ],
-  template: `
-    <div class="form-section-container">
-      <mat-expansion-panel 
-        [expanded]="!section.collapsed"
-        class="section-panel">
-        
-        <!-- Section Header -->
-        <mat-expansion-panel-header class="section-header">
-          <mat-panel-title class="section-title">
-            <mat-icon class="section-icon">{{getSectionIcon()}}</mat-icon>
-            <span class="section-title-text">{{section.title}}</span>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <!-- Section Content -->
-        <div class="section-content" [formGroup]="formGroup">
-          <div class="form-grid">
-            <div 
-              *ngFor="let field of section.fields; trackBy: trackByFieldId"
-              class="form-field-container"
-              [ngClass]="getFieldGridClass(field)">
-              
-              <!-- Text Input -->
-              <mat-form-field 
-                *ngIf="field.type === 'text'" 
-                appearance="outline"
-                class="form-field">
-                <mat-label>{{field.label}}</mat-label>
-                <input 
-                  matInput 
-                  [formControlName]="field.id"
-                  [placeholder]="field.placeholder || ''"
-                  [readonly]="field.readOnly">
-          <mat-hint *ngIf="field.attributes?.hint">{{field.attributes?.hint}}</mat-hint>
-                <mat-error *ngIf="getFieldControl(field.id)?.errors?.['required']">
-                  {{getValidationMessage(field, 'required')}}
-                </mat-error>
-                <mat-error *ngIf="getFieldControl(field.id)?.errors?.['email']">
-                  {{getValidationMessage(field, 'email')}}
-                </mat-error>
-              </mat-form-field>
-
-              <!-- Textarea -->
-              <mat-form-field 
-                *ngIf="field.type === 'textarea'" 
-                appearance="outline"
-                class="form-field full-width">
-                <mat-label>{{field.label}}</mat-label>
-                <textarea 
-                  matInput 
-                  [formControlName]="field.id"
-                  [placeholder]="field.placeholder || ''"
-                  [rows]="field.attributes?.rows || 3"
-                  [readonly]="field.readOnly">
-                </textarea>
-                <mat-hint *ngIf="field.attributes?.hint">{{field.attributes?.hint}}</mat-hint>
-                <mat-error *ngIf="getFieldControl(field.id)?.errors?.['required']">
-                  {{getValidationMessage(field, 'required')}}
-                </mat-error>
-              </mat-form-field>
-
-              <!-- Select -->
-              <mat-form-field 
-                *ngIf="field.type === 'select'" 
-                appearance="outline"
-                class="form-field">
-                <mat-label>{{field.label}}</mat-label>
-                <mat-select [formControlName]="field.id">
-                  <mat-option 
-                    *ngFor="let option of getFieldOptions(field); trackBy: trackByOptionValue" 
-                    [value]="option.value"
-                    [disabled]="option.disabled">
-                    {{option.label}}
-                  </mat-option>
-                </mat-select>
-                <mat-hint *ngIf="field.attributes?.hint">{{field.attributes?.hint}}</mat-hint>
-                <mat-error *ngIf="getFieldControl(field.id)?.errors?.['required']">
-                  {{getValidationMessage(field, 'required')}}
-                </mat-error>
-              </mat-form-field>
-
-              <!-- Radio Group -->
-              <div *ngIf="field.type === 'radio'" class="radio-group full-width">
-                <label class="field-label">{{field.label}}</label>
-                <mat-radio-group [formControlName]="field.id" class="radio-group-content">
-                  <mat-radio-button 
-                    *ngFor="let option of getFieldOptions(field); trackBy: trackByOptionValue"
-                    [value]="option.value"
-                    [disabled]="option.disabled"
-                    class="radio-option">
-                    {{option.label}}
-                  </mat-radio-button>
-                </mat-radio-group>
-                <div *ngIf="field.attributes?.hint" class="field-hint">{{field.attributes?.hint}}</div>
-                <div *ngIf="getFieldControl(field.id)?.errors?.['required']" class="field-error">
-                  {{getValidationMessage(field, 'required')}}
-                </div>
-              </div>
-
-              <!-- Number Input -->
-              <mat-form-field 
-                *ngIf="field.type === 'number'" 
-                appearance="outline"
-                class="form-field">
-                <mat-label>{{field.label}}</mat-label>
-                <input 
-                  matInput 
-                  type="number"
-                  [formControlName]="field.id"
-                  [placeholder]="field.placeholder || ''"
-                  [readonly]="field.readOnly">
-                <mat-hint *ngIf="field.attributes?.hint">{{field.attributes?.hint}}</mat-hint>
-                <mat-error *ngIf="getFieldControl(field.id)?.errors?.['required']">
-                  {{getValidationMessage(field, 'required')}}
-                </mat-error>
-              </mat-form-field>
-
-              <!-- Date Input -->
-              <mat-form-field 
-                *ngIf="field.type === 'date'" 
-                appearance="outline"
-                class="form-field">
-                <mat-label>{{field.label}}</mat-label>
-                <input 
-                  matInput 
-                  [matDatepicker]="picker"
-                  [formControlName]="field.id"
-                  [readonly]="field.readOnly">
-                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                <mat-datepicker #picker></mat-datepicker>
-                <mat-hint *ngIf="field.attributes?.hint">{{field.attributes?.hint}}</mat-hint>
-                <mat-error *ngIf="getFieldControl(field.id)?.errors?.['required']">
-                  {{getValidationMessage(field, 'required')}}
-                </mat-error>
-              </mat-form-field>
-
-              <!-- Checkbox -->
-              <div *ngIf="field.type === 'checkbox'" class="checkbox-field">
-                <mat-checkbox [formControlName]="field.id" [disabled]="field.readOnly || false">
-                  {{field.label}}
-                </mat-checkbox>
-                <div *ngIf="field.attributes?.hint" class="field-hint">{{field.attributes?.hint}}</div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </mat-expansion-panel>
-    </div>
-  `,
+  templateUrl: './form-section.component.html',
   styleUrls: ['./form-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FormSectionComponent implements OnInit {
+export class FormSectionComponent implements OnInit, OnDestroy {
   @Input() section!: FormSection;
   @Input() formGroup!: FormGroup;
   @Input() sectionIndex: number = 0;
 
+  private destroy$ = new Subject<void>();
+  private fieldOptionsCache = new Map<string, FieldOption[]>();
+
   ngOnInit(): void {
-    // Component initialization
+    this.validateInputs();
+    this.setupFormSubscriptions();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.fieldOptionsCache.clear();
+  }
+
+  /**
+   * Validate required inputs
+   */
+  private validateInputs(): void {
+    if (!this.section) {
+      throw new Error('FormSectionComponent: section input is required');
+    }
+    if (!this.formGroup) {
+      throw new Error('FormSectionComponent: formGroup input is required');
+    }
+  }
+
+  /**
+   * Setup form subscriptions for change detection optimization
+   */
+  private setupFormSubscriptions(): void {
+    // Subscribe to form changes for performance monitoring
+    this.formGroup.statusChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Could add custom logic here for form state changes
+      });
   }
 
   /**
@@ -202,23 +88,31 @@ export class FormSectionComponent implements OnInit {
     if (sectionId.includes('basic') || sectionId.includes('general')) {
       return 'info';
     } else if (sectionId.includes('employee') || sectionId.includes('personal')) {
-      return 'person';
+      return 'badge';
     } else if (sectionId.includes('employment') || sectionId.includes('work')) {
-      return 'work';
+      return 'business_center';
     } else if (sectionId.includes('contact')) {
       return 'contact_mail';
     } else if (sectionId.includes('address')) {
-      return 'location_on';
+      return 'place';
     }
     
-    return 'description';
+    return 'article';
   }
 
   /**
-   * Get field control from form group
+   * Get field control from form group with proper typing
    */
-  getFieldControl(fieldId: string) {
-    return this.formGroup.get(fieldId);
+  getFieldControl(fieldId: string): AbstractControl | null {
+    return this.formGroup?.get(fieldId) || null;
+  }
+
+  /**
+   * Check if field has specific error and is touched/dirty
+   */
+  hasFieldError(fieldId: string, errorType: string): boolean {
+    const control = this.getFieldControl(fieldId);
+    return !!(control?.hasError(errorType) && (control.dirty || control.touched));
   }
 
   /**
@@ -270,12 +164,20 @@ export class FormSectionComponent implements OnInit {
   }
 
   /**
-   * Get field options, handling both FieldOption[] and FieldOptionGroup[] types
+   * Get field options with caching for performance
    */
   getFieldOptions(field: FormField): FieldOption[] {
     if (!field.options) {
       return [];
     }
+
+    // Check cache first
+    const cacheKey = field.id;
+    if (this.fieldOptionsCache.has(cacheKey)) {
+      return this.fieldOptionsCache.get(cacheKey)!;
+    }
+
+    let options: FieldOption[] = [];
 
     // Check if it's an array of FieldOptionGroup
     if (Array.isArray(field.options) && field.options.length > 0) {
@@ -283,13 +185,74 @@ export class FormSectionComponent implements OnInit {
       // Check if first item has 'options' property (indicating it's a FieldOptionGroup)
       if ('options' in firstItem && Array.isArray(firstItem.options)) {
         // Flatten all options from groups
-        return (field.options as FieldOptionGroup[]).reduce((acc: FieldOption[], group) => {
+        options = (field.options as FieldOptionGroup[]).reduce((acc: FieldOption[], group) => {
           return acc.concat(group.options);
         }, []);
+      } else {
+        // It's already a FieldOption[]
+        options = field.options as FieldOption[];
       }
+    } else {
+      options = field.options as FieldOption[];
     }
 
-    // It's already a FieldOption[]
-    return field.options as FieldOption[];
+    // Cache the result
+    this.fieldOptionsCache.set(cacheKey, options);
+    return options;
+  }
+
+  /**
+   * Get field by ID for type safety
+   */
+  getFieldById(fieldId: string): FormField | undefined {
+    return this.section.fields.find(field => field.id === fieldId);
+  }
+
+  /**
+   * Check if section has errors
+   */
+  get hasErrors(): boolean {
+    if (!this.formGroup) return false;
+    
+    return this.section.fields.some(field => {
+      const control = this.getFieldControl(field.id);
+      return control && control.invalid && (control.dirty || control.touched);
+    });
+  }
+
+  /**
+   * Get section error count
+   */
+  get errorCount(): number {
+    if (!this.formGroup) return 0;
+    
+    return this.section.fields.reduce((count, field) => {
+      const control = this.getFieldControl(field.id);
+      if (control && control.invalid && (control.dirty || control.touched)) {
+        return count + Object.keys(control.errors || {}).length;
+      }
+      return count;
+    }, 0);
+  }
+
+  /**
+   * Get field input type with fallback
+   */
+  getInputType(field: FormField): string {
+    return (field as any).inputType || 'text';
+  }
+
+  /**
+   * Check if field is disabled with proper boolean handling
+   */
+  isFieldDisabled(field: FormField): boolean {
+    return field.readOnly === true;
+  }
+
+  /**
+   * Get field attribute with type safety
+   */
+  getFieldAttribute(field: FormField, attributeName: string): any {
+    return field.attributes?.[attributeName] || null;
   }
 }

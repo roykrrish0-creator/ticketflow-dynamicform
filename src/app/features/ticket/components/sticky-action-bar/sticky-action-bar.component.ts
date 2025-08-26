@@ -48,7 +48,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
               diameter="16" 
               class="btn-spinner">
             </mat-spinner>
-            <mat-icon *ngIf="!isDraftSaving">draft</mat-icon>
+            <mat-icon *ngIf="!isDraftSaving">drafts</mat-icon>
             <span class="btn-text">{{ isDraftSaving ? 'Saving...' : 'Save Draft' }}</span>
           </button>
         </div>

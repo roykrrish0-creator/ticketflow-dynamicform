@@ -19,6 +19,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { FormSectionComponent } from '../../components/form-section/form-section.component';
@@ -58,6 +60,8 @@ import {
     MatCardModule,
     MatChipsModule,
     MatTooltipModule,
+    MatMenuModule,
+    MatDialogModule,
     FormSectionComponent,
     TicketDetailHeaderComponent,
     TicketSummaryComponent
@@ -97,6 +101,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   isTabletView = false;
   showSummaryDrawer = false;
   isSummarySticky = true;
+  isEditMode = false;
+  showCancelConfirmation = false;
   
   // Configuration
   autoSaveEnabled = true;
@@ -722,25 +728,37 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       formData: {
         basic_information: {
           ticket_id: '#1234',
-          process_type: 'Employee Onboarding',
+          process_type: 'employee_onboarding',
           client: 'Acme Corp',
-          created_date: 'Jan 15, 2024',
-          subject: 'Employee Onboarding - John Smith'
+          priority_level: 'medium',
+          due_date: '2024-02-15'
         },
         employee_details: {
           full_name: 'John Smith',
           employee_id: 'EMP-2024-001',
           email_address: 'john.smith@acmecorp.com',
-          phone_number: '+1 (555) 123-4567'
+          phone_number: '+1 (555) 123-4567',
+          date_of_birth: '1990-05-15',
+          emergency_contact: 'Jane Smith',
+          emergency_phone: '+1 (555) 987-6543'
         },
         employment_information: {
           start_date: '2024-01-22',
           department: 'engineering',
-          position_title: 'Software Engineer',
+          position_title: 'Senior Software Engineer',
           reporting_manager: 'Sarah Johnson',
-          work_location: 'New York Office',
+          work_location: 'new_york',
           employment_type: 'full-time',
-          additional_notes: 'New hire with 5 years of experience in React and Node.js'
+          salary_range: '100k-120k',
+          benefits_eligible: true,
+          additional_notes: 'New hire with 5+ years experience in React and Node.js. Will be working on the core platform team.'
+        },
+        equipment_access: {
+          laptop_type: 'macbook',
+          monitor_needed: true,
+          phone_needed: false,
+          access_systems: 'GitHub, Jira, Confluence, Slack, Google Workspace, AWS Console',
+          special_requirements: ''
         }
       },
       formSchemaId: 'schema_001',
@@ -795,7 +813,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Create mock form schema (replace with actual API service)
+   * Create comprehensive mock form schema (replace with actual API service)
    */
   private createMockFormSchema(): FormSchema {
     return {
@@ -815,35 +833,48 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
               label: 'Ticket ID',
               type: 'text',
               default: '#1234',
-              readOnly: true
+              readOnly: true,
+              validators: []
             },
             {
               id: 'process_type',
               label: 'Process Type',
-              type: 'text',
-              default: 'Employee Onboarding',
-              readOnly: true
+              type: 'select',
+              default: 'employee_onboarding',
+              options: [
+                { value: 'employee_onboarding', label: 'Employee Onboarding' },
+                { value: 'employee_offboarding', label: 'Employee Offboarding' },
+                { value: 'role_change', label: 'Role Change' },
+                { value: 'department_transfer', label: 'Department Transfer' }
+              ],
+              validators: [{ name: 'required', message: 'Process type is required' }]
             },
             {
               id: 'client',
-              label: 'Client',
+              label: 'Client/Organization',
               type: 'text',
               default: 'Acme Corp',
-              readOnly: true
+              validators: [{ name: 'required', message: 'Client name is required' }]
             },
             {
-              id: 'created_date',
-              label: 'Created Date',
-              type: 'text',
-              default: 'Jan 15, 2024',
-              readOnly: true
+              id: 'priority_level',
+              label: 'Priority Level',
+              type: 'radio',
+              default: 'medium',
+              options: [
+                { value: 'low', label: 'Low' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'high', label: 'High' },
+                { value: 'urgent', label: 'Urgent' }
+              ],
+              validators: [{ name: 'required', message: 'Priority level is required' }]
             },
             {
-              id: 'subject',
-              label: 'Subject',
-              type: 'text',
-              default: 'Employee Onboarding - John Smith',
-              readOnly: true
+              id: 'due_date',
+              label: 'Due Date',
+              type: 'date',
+              default: '2024-02-15',
+              validators: [{ name: 'required', message: 'Due date is required' }]
             }
           ]
         },
@@ -851,7 +882,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
           id: 'employee_details',
           title: 'Employee Details',
           collapsible: true,
-          collapsed: false,
+          collapsed: true,
           repeatable: false,
           fields: [
             {
@@ -859,13 +890,18 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
               label: 'Full Name',
               type: 'text',
               default: 'John Smith',
-              validators: [{ name: 'required', message: 'Full name is required' }]
+              placeholder: 'Enter full name',
+              validators: [
+                { name: 'required', message: 'Full name is required' },
+                { name: 'minlength', message: 'Name must be at least 2 characters', value: 2 }
+              ]
             },
             {
               id: 'employee_id',
               label: 'Employee ID',
               type: 'text',
               default: 'EMP-2024-001',
+              placeholder: 'e.g., EMP-2024-001',
               validators: [{ name: 'required', message: 'Employee ID is required' }]
             },
             {
@@ -873,6 +909,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
               label: 'Email Address',
               type: 'text',
               default: 'john.smith@acmecorp.com',
+              placeholder: 'Enter email address',
               validators: [
                 { name: 'required', message: 'Email address is required' },
                 { name: 'email', message: 'Please enter a valid email address' }
@@ -883,7 +920,31 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
               label: 'Phone Number',
               type: 'text',
               default: '+1 (555) 123-4567',
+              placeholder: '+1 (555) 000-0000',
               validators: [{ name: 'required', message: 'Phone number is required' }]
+            },
+            {
+              id: 'date_of_birth',
+              label: 'Date of Birth',
+              type: 'date',
+              default: '1990-05-15',
+              validators: [{ name: 'required', message: 'Date of birth is required' }]
+            },
+            {
+              id: 'emergency_contact',
+              label: 'Emergency Contact Name',
+              type: 'text',
+              default: 'Jane Smith',
+              placeholder: 'Emergency contact full name',
+              validators: [{ name: 'required', message: 'Emergency contact is required' }]
+            },
+            {
+              id: 'emergency_phone',
+              label: 'Emergency Contact Phone',
+              type: 'text',
+              default: '+1 (555) 987-6543',
+              placeholder: '+1 (555) 000-0000',
+              validators: [{ name: 'required', message: 'Emergency contact phone is required' }]
             }
           ]
         },
@@ -891,7 +952,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
           id: 'employment_information',
           title: 'Employment Information',
           collapsible: true,
-          collapsed: false,
+          collapsed: true,
           repeatable: false,
           fields: [
             {
@@ -907,11 +968,16 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
               type: 'select',
               default: 'engineering',
               options: [
+                { value: '', label: 'Select Department' },
                 { value: 'engineering', label: 'Engineering' },
+                { value: 'product', label: 'Product Management' },
+                { value: 'design', label: 'Design & UX' },
                 { value: 'marketing', label: 'Marketing' },
                 { value: 'sales', label: 'Sales' },
                 { value: 'hr', label: 'Human Resources' },
-                { value: 'finance', label: 'Finance' }
+                { value: 'finance', label: 'Finance' },
+                { value: 'operations', label: 'Operations' },
+                { value: 'support', label: 'Customer Support' }
               ],
               validators: [{ name: 'required', message: 'Department is required' }]
             },
@@ -919,21 +985,31 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
               id: 'position_title',
               label: 'Position/Title',
               type: 'text',
-              default: 'Software Engineer',
-              validators: [{ name: 'required', message: 'Position is required' }]
+              default: 'Senior Software Engineer',
+              placeholder: 'Enter job title',
+              validators: [{ name: 'required', message: 'Position title is required' }]
             },
             {
               id: 'reporting_manager',
               label: 'Reporting Manager',
               type: 'text',
               default: 'Sarah Johnson',
+              placeholder: 'Enter manager name',
               validators: [{ name: 'required', message: 'Reporting manager is required' }]
             },
             {
               id: 'work_location',
               label: 'Work Location',
-              type: 'text',
-              default: 'New York Office',
+              type: 'select',
+              default: 'new_york',
+              options: [
+                { value: '', label: 'Select Location' },
+                { value: 'new_york', label: 'New York Office' },
+                { value: 'san_francisco', label: 'San Francisco Office' },
+                { value: 'chicago', label: 'Chicago Office' },
+                { value: 'remote', label: 'Remote' },
+                { value: 'hybrid', label: 'Hybrid' }
+              ],
               validators: [{ name: 'required', message: 'Work location is required' }]
             },
             {
@@ -944,15 +1020,95 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
               options: [
                 { value: 'full-time', label: 'Full-time' },
                 { value: 'part-time', label: 'Part-time' },
-                { value: 'contract', label: 'Contract' }
-              ]
+                { value: 'contract', label: 'Contract' },
+                { value: 'intern', label: 'Internship' }
+              ],
+              validators: [{ name: 'required', message: 'Employment type is required' }]
+            },
+            {
+              id: 'salary_range',
+              label: 'Salary Range',
+              type: 'select',
+              default: '100k-120k',
+              options: [
+                { value: '', label: 'Select Salary Range' },
+                { value: '40k-60k', label: '$40,000 - $60,000' },
+                { value: '60k-80k', label: '$60,000 - $80,000' },
+                { value: '80k-100k', label: '$80,000 - $100,000' },
+                { value: '100k-120k', label: '$100,000 - $120,000' },
+                { value: '120k-150k', label: '$120,000 - $150,000' },
+                { value: '150k+', label: '$150,000+' }
+              ],
+              validators: [{ name: 'required', message: 'Salary range is required' }]
+            },
+            {
+              id: 'benefits_eligible',
+              label: 'Eligible for Benefits',
+              type: 'checkbox',
+              default: true,
+              validators: []
             },
             {
               id: 'additional_notes',
               label: 'Additional Notes',
               type: 'textarea',
-              placeholder: 'Enter any additional information...',
-              attributes: { rows: 4 }
+              default: 'New hire with 5+ years experience in React and Node.js. Will be working on the core platform team.',
+              placeholder: 'Enter any additional information, special requirements, or notes...',
+              attributes: { rows: 4 },
+              validators: []
+            }
+          ]
+        },
+        {
+          id: 'equipment_access',
+          title: 'Equipment & Access Requirements',
+          collapsible: true,
+          collapsed: true,
+          repeatable: false,
+          fields: [
+            {
+              id: 'laptop_type',
+              label: 'Laptop Preference',
+              type: 'radio',
+              default: 'macbook',
+              options: [
+                { value: 'macbook', label: 'MacBook Pro' },
+                { value: 'windows', label: 'Windows Laptop' },
+                { value: 'linux', label: 'Linux Laptop' }
+              ],
+              validators: [{ name: 'required', message: 'Laptop preference is required' }]
+            },
+            {
+              id: 'monitor_needed',
+              label: 'External Monitor Required',
+              type: 'checkbox',
+              default: true,
+              validators: []
+            },
+            {
+              id: 'phone_needed',
+              label: 'Company Phone Required',
+              type: 'checkbox',
+              default: false,
+              validators: []
+            },
+            {
+              id: 'access_systems',
+              label: 'Required System Access',
+              type: 'textarea',
+              default: 'GitHub, Jira, Confluence, Slack, Google Workspace, AWS Console',
+              placeholder: 'List all systems and tools the employee needs access to...',
+              attributes: { rows: 3 },
+              validators: []
+            },
+            {
+              id: 'special_requirements',
+              label: 'Special Equipment Requirements',
+              type: 'textarea',
+              default: '',
+              placeholder: 'Any special equipment, software, or accessibility requirements...',
+              attributes: { rows: 3 },
+              validators: []
             }
           ]
         }
@@ -997,16 +1153,16 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
     if (sectionLower.includes('basic') || sectionLower.includes('general')) {
       return 'info';
     } else if (sectionLower.includes('employee') || sectionLower.includes('personal')) {
-      return 'person';
+      return 'badge';
     } else if (sectionLower.includes('employment') || sectionLower.includes('work')) {
-      return 'work';
+      return 'business_center';
     } else if (sectionLower.includes('contact')) {
       return 'contact_mail';
     } else if (sectionLower.includes('address')) {
-      return 'location_on';
+      return 'place';
     }
     
-    return 'description';
+    return 'article';
   }
   
   /**
@@ -1050,18 +1206,18 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
     const actionLower = action.toLowerCase();
     
     if (actionLower.includes('created')) {
-      return 'add_circle';
+      return 'add_circle_outline';
     } else if (actionLower.includes('assigned')) {
-      return 'person_add';
+      return 'person_add_alt_1';
     } else if (actionLower.includes('status')) {
-      return 'update';
-    } else if (actionLower.includes('upload')) {
-      return 'upload_file';
+      return 'trending_up';
+    } else if (actionLower.includes('upload') || actionLower.includes('document')) {
+      return 'file_upload';
     } else if (actionLower.includes('comment')) {
-      return 'chat';
+      return 'chat_bubble';
     }
     
-    return 'history';
+    return 'schedule';
   }
 
   /**
@@ -1136,6 +1292,64 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   handleReassign(): void {
     // TODO: Implement reassign functionality
     console.log('Reassign ticket');
+  }
+
+  /**
+   * Enter edit mode
+   */
+  enterEditMode(): void {
+    this.isEditMode = true;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Exit edit mode and return to read-only
+   */
+  exitEditMode(): void {
+    this.isEditMode = false;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Handle save changes action
+   */
+  async handleSaveChanges(): Promise<void> {
+    await this.onSubmit();
+    if (!this.saveOperation.error) {
+      this.exitEditMode();
+    }
+  }
+
+  /**
+   * Handle cancel action from dropdown
+   */
+  handleCancel(): void {
+    if (this.dynamicForm?.dirty) {
+      this.showCancelConfirmation = true;
+      this.cdr.detectChanges();
+    } else {
+      this.exitEditMode();
+    }
+  }
+
+  /**
+   * Confirm discard changes
+   */
+  confirmDiscardChanges(): void {
+    if (this.dynamicForm && this.ticket?.formData) {
+      this.dynamicFormService.populateForm(this.dynamicForm, this.ticket.formData);
+      this.dynamicForm.markAsPristine();
+    }
+    this.showCancelConfirmation = false;
+    this.exitEditMode();
+  }
+
+  /**
+   * Cancel discard changes (go back to editing)
+   */
+  cancelDiscardChanges(): void {
+    this.showCancelConfirmation = false;
+    this.cdr.detectChanges();
   }
   
   
