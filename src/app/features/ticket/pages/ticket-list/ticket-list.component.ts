@@ -4,13 +4,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-ticket-list',
-  standalone: true,
-  imports: [
-    MatButtonModule,
-    MatIconModule
-  ],
-  template: `
+    selector: 'app-ticket-list',
+    imports: [
+        MatButtonModule,
+        MatIconModule
+    ],
+    template: `
     <div class="main-container">
       <div class="content">
         <h1>TicketFlow</h1>
@@ -23,7 +22,7 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .main-container {
       min-height: 100vh;
       display: flex;

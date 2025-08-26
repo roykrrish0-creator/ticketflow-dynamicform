@@ -9,17 +9,16 @@ import { RouterModule } from '@angular/router';
 import { Ticket } from '../../../../shared/models/ticket.interface';
 
 @Component({
-  selector: 'app-ticket-detail-header',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatDividerModule
-  ],
-  template: `
+    selector: 'app-ticket-detail-header',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatButtonModule,
+        MatIconModule,
+        MatMenuModule,
+        MatDividerModule
+    ],
+    template: `
     <header class="ticket-header" role="banner">
       <!-- Breadcrumb Navigation -->
       <nav class="breadcrumb-nav" aria-label="Breadcrumb">
@@ -105,8 +104,8 @@ import { Ticket } from '../../../../shared/models/ticket.interface';
       </div>
     </header>
   `,
-  styleUrl: './ticket-detail-header.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrl: './ticket-detail-header.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketDetailHeaderComponent {
   @Input() ticket?: Ticket;

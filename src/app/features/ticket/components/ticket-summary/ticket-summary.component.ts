@@ -5,13 +5,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { Ticket } from '../../../../shared/models/ticket.interface';
 
 @Component({
-  selector: 'app-ticket-summary',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule
-  ],
-  template: `
+    selector: 'app-ticket-summary',
+    imports: [
+        CommonModule,
+        MatIconModule
+    ],
+    template: `
     <div class="ticket-summary-card" *ngIf="ticket">
       <!-- Card Header -->
       <div class="summary-header">
@@ -111,8 +110,8 @@ import { Ticket } from '../../../../shared/models/ticket.interface';
       </div>
     </div>
   `,
-  styleUrl: './ticket-summary.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    styleUrl: './ticket-summary.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketSummaryComponent {
   @Input() ticket?: Ticket;

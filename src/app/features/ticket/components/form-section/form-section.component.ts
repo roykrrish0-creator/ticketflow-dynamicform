@@ -16,25 +16,24 @@ import { Subject, takeUntil } from 'rxjs';
 import { FormSection, FormField, FieldOption, FieldOptionGroup } from '../../../../shared/models';
 
 @Component({
-  selector: 'app-form-section',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatCheckboxModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule,
-    MatButtonModule
-  ],
-  templateUrl: './form-section.component.html',
-  styleUrls: ['./form-section.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-form-section',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatRadioModule,
+        MatCheckboxModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule,
+        MatButtonModule
+    ],
+    templateUrl: './form-section.component.html',
+    styleUrls: ['./form-section.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FormSectionComponent implements OnInit, OnDestroy {
   @Input() section!: FormSection;
