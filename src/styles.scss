@@ -10,7 +10,8 @@
 @tailwind utilities;
 
 // Include Material Core
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 /* Light Theme */
 :root, :host {
