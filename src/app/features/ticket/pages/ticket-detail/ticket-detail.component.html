@@ -12,12 +12,10 @@
   <!-- Header section -->
   <div class="bg-white border-b border-gray-200 px-6 py-3 m-1 rounded-lg sticky top-0 z-50 shadow-md">
     <div class="flex items-center gap-4">
-      <!-- Back Button (First) - MD3 Text Button -->
-      <button mat-button 
-              class="md-text-button"
-              routerLink="/tickets">
-        <mat-icon class="md-button-icon" aria-hidden="true">arrow_back</mat-icon>
-        <span class="md-button-label">Back to tickets</span>
+      <!-- Back Button (First) - Standard Text Button -->
+      <button mat-button routerLink="/tickets">
+        <mat-icon>arrow_back</mat-icon>
+        Back to tickets
       </button>
       
       <!-- Main Header Info (Center) -->
@@ -35,12 +33,10 @@
       <div class="flex justify-between items-center gap-4 flex-shrink-0">
         <!-- Left Side Actions -->
         <div class="flex items-center">
-          <!-- Reassign Button - MD3 Tonal Button -->
-          <button mat-flat-button 
-                  class="md-tonal-button"
-                  (click)="handleReassign()">
-            <mat-icon class="md-button-icon" aria-hidden="true">person_pin</mat-icon>
-            <span class="md-button-label">Reassign</span>
+          <!-- Reassign Button - Standard Stroked Button -->
+          <button mat-stroked-button (click)="handleReassign()">
+            <mat-icon>person_pin</mat-icon>
+            Reassign
           </button>
         </div>
 
@@ -48,68 +44,43 @@
         <div class="flex items-center">
           <!-- Read-only Mode Buttons -->
           <ng-container *ngIf="!isEditMode">
-            <!-- Edit Button - MD3 Filled Button -->
+            <!-- Edit Button - Standard Flat Button -->
             <button mat-flat-button 
                     color="primary" 
-                    class="md-filled-button"
                     (click)="enterEditMode()">
-              <mat-icon class="md-button-icon" aria-hidden="true">edit</mat-icon>
-              <span class="md-button-label">Edit</span>
+              <mat-icon>edit</mat-icon>
+              Edit
             </button>
           </ng-container>
 
-          <!-- Edit Mode - Material Design Split Button -->
+          <!-- Edit Mode - Standard Button Group -->
           <ng-container *ngIf="isEditMode">
-            <div class="md-split-button" role="group" [attr.aria-label]="'Save actions'">
-              <!-- Primary Action Button -->
+            <div class="flex items-center gap-2">
+              <!-- Primary Save Button -->
               <button mat-flat-button 
                       color="primary"
-                      class="md-split-primary"
                       [disabled]="!canSave || isSaving"
-                      (click)="handleSaveChanges()"
-                      [attr.aria-describedby]="'save-button-description'">
-                <mat-icon *ngIf="!isSaving" 
-                          class="md-button-icon" 
-                          aria-hidden="true">save</mat-icon>
-                <mat-icon *ngIf="isSaving" 
-                          class="md-button-icon md-icon-loading" 
-                          aria-hidden="true">sync</mat-icon>
-                <span class="md-button-label">
-                  {{ isSaving ? 'Saving...' : 'Save changes' }}
-                </span>
+                      (click)="handleSaveChanges()">
+                <mat-icon *ngIf="!isSaving">save</mat-icon>
+                <mat-icon *ngIf="isSaving">sync</mat-icon>
+                {{ isSaving ? 'Saving...' : 'Save changes' }}
               </button>
               
-              <!-- Secondary Action Button (Menu Trigger) -->
-              <button mat-flat-button 
-                      color="primary"
-                      class="md-split-secondary"
-                      [matMenuTriggerFor]="splitButtonMenu"
+              <!-- Options Menu Button -->
+              <button mat-icon-button 
+                      [matMenuTriggerFor]="optionsMenu"
                       [disabled]="isSaving"
-                      aria-label="More save options"
-                      [attr.aria-expanded]="false"
-                      [attr.aria-haspopup]="true">
-                <mat-icon class="md-dropdown-icon" 
-                          aria-hidden="true">arrow_drop_down</mat-icon>
+                      aria-label="More options">
+                <mat-icon>more_vert</mat-icon>
               </button>
               
-              <!-- Material Design Menu -->
-              <mat-menu #splitButtonMenu="matMenu" 
-                        class="md-split-menu"
-                        [xPosition]="'after'"
-                        [yPosition]="'below'"
-                        [overlapTrigger]="false">
-                <button mat-menu-item 
-                        (click)="handleCancel()"
-                        class="md-menu-item">
-                  <mat-icon class="md-menu-icon" aria-hidden="true">cancel</mat-icon>
-                  <span class="md-menu-label">Cancel changes</span>
+              <!-- Options Menu -->
+              <mat-menu #optionsMenu="matMenu">
+                <button mat-menu-item (click)="handleCancel()">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel changes
                 </button>
               </mat-menu>
-              
-              <!-- Screen reader description -->
-              <div id="save-button-description" class="sr-only">
-                Save changes to the current ticket. Use the dropdown for additional options.
-              </div>
             </div>
           </ng-container>
         </div>
@@ -176,33 +147,21 @@
     </div>
   </div>
 
-  <!-- Bottom Tabs Section -->
-  <div class="bg-white border border-gray-200 m-6 p-6 rounded-xl shadow-sm overflow-hidden h-fit" #tabsContainer>
-    <div class="flex justify-between items-center pb-4 border-b border-gray-200">
-      <div class="flex gap-0">
-        <button class="flex items-center gap-2 px-4 py-2 bg-transparent border-none text-gray-500 text-sm font-normal cursor-pointer border-b-2 border-transparent transition-all hover:text-blue-500" 
-                [class.!text-blue-500]="selectedTabIndex === 0"
-                [class.!border-blue-500]="selectedTabIndex === 0"
-                [class.!font-medium]="selectedTabIndex === 0"
-                (click)="selectedTabIndex = 0">
-          <mat-icon class="!text-base !w-4 !h-4">chat_bubble_outline</mat-icon>
-          Comments (3)
-        </button>
-        <button class="flex items-center gap-2 px-4 py-2 bg-transparent border-none text-gray-500 text-sm font-normal cursor-pointer border-b-2 border-transparent transition-all hover:text-blue-500"
-                [class.!text-blue-500]="selectedTabIndex === 1"
-                [class.!border-blue-500]="selectedTabIndex === 1"
-                [class.!font-medium]="selectedTabIndex === 1"
-                (click)="selectedTabIndex = 1">
-          <mat-icon class="!text-base !w-4 !h-4">schedule</mat-icon>
-          History (4)
-        </button>
-      </div>
-    </div>
-    
-    <div class="">
-      <!-- Comments Tab Content -->
-      <div *ngIf="selectedTabIndex === 0" class="p-0">
-        <div class="">
+  <!-- Bottom Tabs Section - Material Design Tabs -->
+  <div class="bg-white border border-gray-200 m-6 rounded-xl shadow-sm overflow-hidden h-fit" #tabsContainer>
+    <mat-tab-group 
+      [(selectedIndex)]="selectedTabIndex"
+      (selectedTabChange)="onTabChange($event.index)"
+      class="ticket-tabs">
+      
+      <!-- Comments Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="mr-2">chat_bubble_outline</mat-icon>
+          Comments ({{ mockComments.length }})
+        </ng-template>
+        
+        <div class="tab-content p-6">
           <!-- Comment Composer -->
           <div class="flex gap-3 mb-6">
             <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
@@ -216,21 +175,20 @@
             </div>
           </div>
           
-          <!-- Add Comment Button - MD3 Filled Button -->
+          <!-- Add Comment Button -->
           <div class="flex justify-end mb-6 pt-4">
             <button mat-flat-button 
                     color="primary" 
-                    class="md-filled-button"
                     (click)="addComment()"
                     [disabled]="!newComment.trim()">
-              <mat-icon class="md-button-icon" aria-hidden="true">add_comment</mat-icon>
-              <span class="md-button-label">Add comment</span>
+              <mat-icon>add_comment</mat-icon>
+              Add comment
             </button>
           </div>
           
           <!-- Comment List -->
-          <div class="">
-            <div class="flex gap-3 mb-5 last:mb-0" *ngFor="let comment of mockComments; let i = index">
+          <div class="space-y-4">
+            <div class="flex gap-3" *ngFor="let comment of mockComments; let i = index">
               <div class="w-8 h-8 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
                 {{ getCommentInitials(comment.author) }}
               </div>
@@ -250,14 +208,19 @@
             </div>
           </div>
         </div>
-      </div>
+      </mat-tab>
 
-      <!-- History Tab Content -->
-      <div *ngIf="selectedTabIndex === 1" class="p-0">
-        <div class="">
-          <div class="">
-            <div class="flex gap-4 py-5 border-b border-gray-200 items-start last:border-b-0" 
-                 *ngFor="let historyItem of mockHistory; trackBy: trackByHistoryId">
+      <!-- History Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="mr-2">schedule</mat-icon>
+          History ({{ historyCount }})
+        </ng-template>
+        
+        <div class="tab-content p-6">
+          <div class="space-y-4">
+            <div class="flex gap-4 py-4 border-b border-gray-200 items-start last:border-b-0" 
+                 *ngFor="let historyItem of historyItems(); trackBy: trackByHistoryId">
               <div class="w-10 h-10 rounded-full bg-gray-100 text-blue-500 flex items-center justify-center flex-shrink-0 border border-gray-200">
                 <mat-icon class="!text-xl !w-5 !h-5">{{ getHistoryIcon(historyItem.action) }}</mat-icon>
               </div>
@@ -277,8 +240,9 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </mat-tab>
+      
+    </mat-tab-group>
   </div>
 
 </div>
@@ -297,10 +261,8 @@
        (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
       <h3 class="text-lg font-semibold text-gray-900 m-0">Discard Changes?</h3>
-      <button mat-icon-button 
-              class="text-gray-500 w-10 h-10 hover:bg-gray-100"
-              (click)="cancelDiscardChanges()">
-        <mat-icon class="!text-xl !w-5 !h-5">close</mat-icon>
+      <button mat-icon-button (click)="cancelDiscardChanges()">
+        <mat-icon>close</mat-icon>
       </button>
     </div>
     <div class="p-4 px-6 pb-6">
@@ -309,18 +271,15 @@
       </p>
     </div>
     <div class="flex gap-3 justify-end p-0 px-6 pb-6">
-      <!-- Cancel Modal Button - MD3 Text Button -->
-      <button mat-button 
-              class="md-text-button-modal"
-              (click)="cancelDiscardChanges()">
-        <span class="md-button-label">Go back</span>
+      <!-- Cancel Modal Button - Standard Text Button -->
+      <button mat-button (click)="cancelDiscardChanges()">
+        Go back
       </button>
-      <!-- Confirm Discard Button - MD3 Filled Tonal Button -->
+      <!-- Confirm Discard Button - Standard Flat Button -->
       <button mat-flat-button 
               color="warn" 
-              class="md-filled-tonal-button md-warn-button"
               (click)="confirmDiscardChanges()">
-        <span class="md-button-label">Discard changes</span>
+        Discard changes
       </button>
     </div>
   </div>

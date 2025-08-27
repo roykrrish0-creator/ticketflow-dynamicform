@@ -1,42 +1,41 @@
 // Ticket Summary Component Styles
 .ticket-summary-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background: var(--mat-sys-background);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   height: fit-content;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   position: sticky;
-  top: var(--spacing-6);
+  top: 1.5rem;
 
   @media (max-width: 767px) {
     position: static;
     max-height: none;
-    margin-top: var(--spacing-4);
+    margin-top: 1rem;
   }
 }
 
 // Summary Header
 .summary-header {
   padding: 20px 20px 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 
   .summary-title {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1f2937;
+    font: var(--mat-sys-title-large);
+    color: var(--mat-sys-on-surface);
   }
 }
 
-// Status Badges
+// Status Badges - Using Material Design tokens
 .status-badges {
   display: flex;
   gap: 8px;
   padding: 16px 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 
   .status-badge {
     display: flex;
@@ -44,7 +43,7 @@
     gap: 6px;
     padding: 4px 12px;
     border-radius: 16px;
-    font-size: 12px;
+    font: var(--mat-sys-label-small);
     font-weight: 500;
 
     mat-icon {
@@ -53,51 +52,53 @@
       height: 14px;
     }
 
+    // Use status badge classes from theme.scss
     &.status-in_progress {
-      background: #fef3c7;
-      color: #d97706;
+      background: var(--mat-sys-tertiary-container);
+      color: var(--mat-sys-on-tertiary-container);
     }
 
     &.status-open {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: var(--mat-sys-primary-container);
+      color: var(--mat-sys-on-primary-container);
     }
 
     &.status-resolved {
-      background: #d1fae5;
-      color: #047857;
+      background: var(--mat-sys-tertiary-container);
+      color: var(--mat-sys-on-tertiary-container);
     }
 
     &.status-closed {
-      background: #f3f4f6;
-      color: #374151;
+      background: var(--mat-sys-surface-container-high);
+      color: var(--mat-sys-on-surface-variant);
     }
   }
 
   .priority-badge {
     padding: 4px 12px;
     border-radius: 16px;
-    font-size: 12px;
+    font: var(--mat-sys-label-small);
     font-weight: 500;
 
+    // Use priority badge classes from theme.scss
     &.priority-high {
-      background: #fecaca;
-      color: #dc2626;
+      background: var(--mat-sys-error-container);
+      color: var(--mat-sys-on-error-container);
     }
 
     &.priority-medium {
-      background: #fed7aa;
-      color: #ea580c;
+      background: var(--mat-sys-secondary-container);
+      color: var(--mat-sys-on-secondary-container);
     }
 
     &.priority-low {
-      background: #e5e7eb;
-      color: #4b5563;
+      background: var(--mat-sys-tertiary-container);
+      color: var(--mat-sys-on-tertiary-container);
     }
 
     &.priority-critical {
-      background: #fecaca;
-      color: #991b1b;
+      background: var(--mat-sys-error-container);
+      color: var(--mat-sys-on-error-container);
     }
   }
 }
@@ -111,21 +112,20 @@
     justify-content: space-between;
     align-items: center;
     padding: 14px 20px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
 
     &:last-child {
       border-bottom: none;
     }
 
     .detail-label {
-      font-size: 14px;
-      color: #6b7280;
-      font-weight: 400;
+      font: var(--mat-sys-body-medium);
+      color: var(--mat-sys-on-surface-variant);
     }
 
     .detail-value {
-      font-size: 14px;
-      color: #1f2937;
+      font: var(--mat-sys-body-medium);
+      color: var(--mat-sys-on-surface);
       font-weight: 500;
       text-align: right;
 
@@ -139,7 +139,7 @@
       }
 
       .unassigned-text {
-        color: #9ca3af;
+        color: var(--mat-sys-on-surface-variant);
         font-style: italic;
       }
     }
@@ -159,20 +159,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font: var(--mat-sys-label-small);
     font-weight: 600;
-    color: white;
+    color: var(--mat-sys-on-primary);
     flex-shrink: 0;
 
     &.reporter-avatar {
-      background: #10b981;
+      background: var(--mat-sys-tertiary);
     }
   }
 
   .user-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1f2937;
+    font: var(--mat-sys-body-medium);
+    color: var(--mat-sys-on-surface);
   }
 }
 
@@ -181,7 +180,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #6b7280;
+  color: var(--mat-sys-on-surface-variant);
 
   .age-icon {
     font-size: 16px;
@@ -190,32 +189,29 @@
   }
 
   .age-duration {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1f2937;
+    font: var(--mat-sys-body-medium);
+    color: var(--mat-sys-on-surface);
   }
 }
-
-
 
 // Responsive adjustments
 @media (max-width: 767px) {
   .ticket-summary-card {
-    border-radius: var(--radius);
+    border-radius: 8px;
     box-shadow: none;
-    border: 1px solid var(--border);
+    border: 1px solid var(--mat-sys-outline-variant);
   }
 
   .summary-header,
   .summary-details {
-    padding: var(--spacing-4);
+    padding: 1rem;
   }
 
   .user-info {
     .user-avatar {
       width: 28px;
       height: 28px;
-      font-size: var(--font-size-xs);
+      font: var(--mat-sys-label-small);
     }
   }
 }
@@ -223,7 +219,7 @@
 // High contrast mode
 @media (prefers-contrast: high) {
   .ticket-summary-card {
-    border: 2px solid var(--text-primary);
+    border: 2px solid var(--mat-sys-on-surface);
   }
 
   .status-badge,

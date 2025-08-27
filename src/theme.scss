@@ -1,0 +1,245 @@
+@use '@angular/material' as mat;
+
+// Apply the Azure-themed Material Design system
+html {
+  color-scheme: light;
+  @include mat.theme((
+    color: mat.$azure-palette,
+    typography: (
+      plain-family: 'Segoe UI, system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif',
+      brand-family: 'Segoe UI, system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif',
+      bold-weight: 600,
+      medium-weight: 500,
+      regular-weight: 400,
+    ),
+    density: 0,
+  ));
+}
+
+// Apply theme's surface background and on-surface text colors globally
+body {
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+// Additional CSS custom properties for business-specific colors
+// These complement the Material Design tokens
+:root {
+  // Priority colors using Material Design system colors
+  --priority-urgent: var(--mat-sys-error);
+  --priority-high: var(--mat-sys-on-error-container);
+  --priority-medium: var(--mat-sys-primary);
+  --priority-low: var(--mat-sys-tertiary);
+  --priority-planning: var(--mat-sys-outline);
+  
+  // Status colors following Material Design principles
+  --status-draft: var(--mat-sys-outline);
+  --status-submitted: var(--mat-sys-primary);
+  --status-open: var(--mat-sys-primary);
+  --status-assigned: var(--mat-sys-secondary);
+  --status-in-progress: var(--mat-sys-tertiary);
+  --status-on-hold: var(--mat-sys-secondary-container);
+  --status-pending-review: var(--mat-sys-primary-container);
+  --status-pending-customer: var(--mat-sys-tertiary-container);
+  --status-resolved: var(--mat-sys-tertiary);
+  --status-closed: var(--mat-sys-outline-variant);
+  --status-cancelled: var(--mat-sys-error);
+  --status-reopened: var(--mat-sys-secondary);
+  
+  // Semantic color mappings
+  --color-success: var(--mat-sys-tertiary);
+  --color-warning: var(--mat-sys-secondary);
+  --color-error: var(--mat-sys-error);
+  --color-info: var(--mat-sys-primary);
+}
+
+// Custom component styles using Material Design tokens
+.azure-card {
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+}
+
+.azure-elevated-card {
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+  border-radius: 12px;
+}
+
+// Status badge styles using Material Design tokens
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font: var(--mat-sys-label-small);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  
+  &.status-success {
+    background: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+  }
+  
+  &.status-warning {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+  
+  &.status-error {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+  
+  &.status-info {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+}
+
+// Priority badge styles
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font: var(--mat-sys-label-small);
+  font-weight: 500;
+  
+  &.priority-urgent {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+  
+  &.priority-high {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+  
+  &.priority-medium {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+  
+  &.priority-low {
+    background: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+  }
+  
+  &.priority-planning {
+    background: var(--mat-sys-surface-container-highest);
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+// Form field enhancements using Material Design tokens
+.azure-form-field {
+  background: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  
+  &:focus-within {
+    border-color: var(--mat-sys-primary);
+    outline: 2px solid var(--mat-sys-primary-container);
+    outline-offset: -1px;
+  }
+}
+
+// Typography utility classes using Material Design tokens
+.azure-headline-large {
+  font: var(--mat-sys-headline-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-headline-medium {
+  font: var(--mat-sys-headline-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-headline-small {
+  font: var(--mat-sys-headline-small);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-title-large {
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-title-medium {
+  font: var(--mat-sys-title-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-title-small {
+  font: var(--mat-sys-title-small);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-body-large {
+  font: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-body-medium {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-body-small {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.azure-label-large {
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-label-medium {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface);
+}
+
+.azure-label-small {
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Context-specific theme for delete/danger actions
+.danger-context {
+  @include mat.theme((
+    color: mat.$red-palette,
+  ));
+}
+
+// Context-specific theme for success actions
+.success-context {
+  @include mat.theme((
+    color: mat.$green-palette,
+  ));
+}
+
+// Accessibility and focus improvements
+.focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+// Screen reader only utility
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

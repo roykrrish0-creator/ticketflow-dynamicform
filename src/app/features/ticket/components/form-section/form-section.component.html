@@ -14,16 +14,14 @@
     <!-- Section Content -->
     <div class="section-content" [formGroup]="formGroup">
       <div class="form-grid">
+        @for (field of section.fields; track trackByFieldId($index, field)) {
         <div 
-          *ngFor="let field of section.fields; trackBy: trackByFieldId"
           class="form-field-container"
-          [ngClass]="getFieldGridClass(field)">
+          [class]="getFieldGridClass(field)">
           
           <!-- Text Input -->
-          <mat-form-field 
-            *ngIf="field.type === 'text'" 
-            appearance="outline"
-            class="form-field">
+          @if (field.type === 'text') {
+          <mat-form-field class="form-field">
             <mat-label>{{ field.label }}</mat-label>
             <input 
               matInput 
@@ -32,29 +30,40 @@
               [readonly]="field.readOnly"
               [type]="getInputType(field)"
               [attr.autocomplete]="getFieldAttribute(field, 'autocomplete')">
-            <mat-hint *ngIf="field.attributes?.hint">{{ getFieldAttribute(field, 'hint') }}</mat-hint>
-            <mat-error *ngIf="hasFieldError(field.id, 'required')">
+            @if (field.attributes?.hint) {
+            <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
+            }
+            @if (hasFieldError(field.id, 'required')) {
+            <mat-error>
               {{ getValidationMessage(field, 'required') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'email')">
+            }
+            @if (hasFieldError(field.id, 'email')) {
+            <mat-error>
               {{ getValidationMessage(field, 'email') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'minlength')">
+            }
+            @if (hasFieldError(field.id, 'minlength')) {
+            <mat-error>
               {{ getValidationMessage(field, 'minlength') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'maxlength')">
+            }
+            @if (hasFieldError(field.id, 'maxlength')) {
+            <mat-error>
               {{ getValidationMessage(field, 'maxlength') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'pattern')">
+            }
+            @if (hasFieldError(field.id, 'pattern')) {
+            <mat-error>
               {{ getValidationMessage(field, 'pattern') }}
             </mat-error>
+            }
           </mat-form-field>
+          }
 
           <!-- Textarea -->
-          <mat-form-field 
-            *ngIf="field.type === 'textarea'" 
-            appearance="outline"
-            class="form-field full-width">
+          @if (field.type === 'textarea') {
+          <mat-form-field class="form-field full-width">
             <mat-label>{{ field.label }}</mat-label>
             <textarea 
               matInput 
@@ -64,64 +73,82 @@
               [readonly]="field.readOnly"
               [attr.maxlength]="getFieldAttribute(field, 'maxlength')">
             </textarea>
-            <mat-hint *ngIf="field.attributes?.hint">{{ getFieldAttribute(field, 'hint') }}</mat-hint>
-            <mat-error *ngIf="hasFieldError(field.id, 'required')">
+            @if (field.attributes?.hint) {
+            <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
+            }
+            @if (hasFieldError(field.id, 'required')) {
+            <mat-error>
               {{ getValidationMessage(field, 'required') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'minlength')">
+            }
+            @if (hasFieldError(field.id, 'minlength')) {
+            <mat-error>
               {{ getValidationMessage(field, 'minlength') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'maxlength')">
+            }
+            @if (hasFieldError(field.id, 'maxlength')) {
+            <mat-error>
               {{ getValidationMessage(field, 'maxlength') }}
             </mat-error>
+            }
           </mat-form-field>
+          }
 
           <!-- Select -->
-          <mat-form-field 
-            *ngIf="field.type === 'select'" 
-            appearance="outline"
-            class="form-field">
+          @if (field.type === 'select') {
+          <mat-form-field class="form-field">
             <mat-label>{{ field.label }}</mat-label>
             <mat-select [formControlName]="field.id" [disabled]="isFieldDisabled(field)">
+              @for (option of getFieldOptions(field); track trackByOptionValue($index, option)) {
               <mat-option 
-                *ngFor="let option of getFieldOptions(field); trackBy: trackByOptionValue" 
                 [value]="option.value"
                 [disabled]="option.disabled">
                 {{ option.label }}
               </mat-option>
+              }
             </mat-select>
-            <mat-hint *ngIf="field.attributes?.hint">{{ getFieldAttribute(field, 'hint') }}</mat-hint>
-            <mat-error *ngIf="hasFieldError(field.id, 'required')">
+            @if (field.attributes?.hint) {
+            <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
+            }
+            @if (hasFieldError(field.id, 'required')) {
+            <mat-error>
               {{ getValidationMessage(field, 'required') }}
             </mat-error>
+            }
           </mat-form-field>
+          }
 
           <!-- Radio Group -->
-          <div *ngIf="field.type === 'radio'" class="radio-group full-width">
+          @if (field.type === 'radio') {
+          <div class="radio-group full-width">
             <label class="field-label">{{ field.label }}</label>
             <mat-radio-group 
               [formControlName]="field.id" 
               class="radio-group-content"
               [disabled]="isFieldDisabled(field)">
+              @for (option of getFieldOptions(field); track trackByOptionValue($index, option)) {
               <mat-radio-button 
-                *ngFor="let option of getFieldOptions(field); trackBy: trackByOptionValue"
                 [value]="option.value"
                 [disabled]="option.disabled"
                 class="radio-option">
                 {{ option.label }}
               </mat-radio-button>
+              }
             </mat-radio-group>
-            <div *ngIf="field.attributes?.hint" class="field-hint">{{ getFieldAttribute(field, 'hint') }}</div>
-            <div *ngIf="hasFieldError(field.id, 'required')" class="field-error">
+            @if (field.attributes?.hint) {
+            <div class="field-hint">{{ getFieldAttribute(field, 'hint') }}</div>
+            }
+            @if (hasFieldError(field.id, 'required')) {
+            <div class="field-error">
               {{ getValidationMessage(field, 'required') }}
             </div>
+            }
           </div>
+          }
 
           <!-- Number Input -->
-          <mat-form-field 
-            *ngIf="field.type === 'number'" 
-            appearance="outline"
-            class="form-field">
+          @if (field.type === 'number') {
+          <mat-form-field class="form-field">
             <mat-label>{{ field.label }}</mat-label>
             <input 
               matInput 
@@ -132,21 +159,30 @@
               [min]="getFieldAttribute(field, 'min')"
               [max]="getFieldAttribute(field, 'max')"
               [step]="getFieldAttribute(field, 'step')">
-            <mat-hint *ngIf="field.attributes?.hint">{{ getFieldAttribute(field, 'hint') }}</mat-hint>
-            <mat-error *ngIf="hasFieldError(field.id, 'required')">
+            @if (field.attributes?.hint) {
+            <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
+            }
+            @if (hasFieldError(field.id, 'required')) {
+            <mat-error>
               {{ getValidationMessage(field, 'required') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'min')">
+            }
+            @if (hasFieldError(field.id, 'min')) {
+            <mat-error>
               {{ getValidationMessage(field, 'min') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'max')">
+            }
+            @if (hasFieldError(field.id, 'max')) {
+            <mat-error>
               {{ getValidationMessage(field, 'max') }}
             </mat-error>
+            }
           </mat-form-field>
+          }
 
           <!-- Date Input -->
+          @if (field.type === 'date') {
           <mat-form-field 
-            *ngIf="field.type === 'date'" 
             appearance="outline"
             class="form-field">
             <mat-label>{{ field.label }}</mat-label>
@@ -159,29 +195,43 @@
               [max]="getFieldAttribute(field, 'max')">
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
-            <mat-hint *ngIf="field.attributes?.hint">{{ getFieldAttribute(field, 'hint') }}</mat-hint>
-            <mat-error *ngIf="hasFieldError(field.id, 'required')">
+            @if (field.attributes?.hint) {
+            <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
+            }
+            @if (hasFieldError(field.id, 'required')) {
+            <mat-error>
               {{ getValidationMessage(field, 'required') }}
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'matDatepickerMin')">
+            }
+            @if (hasFieldError(field.id, 'matDatepickerMin')) {
+            <mat-error>
               Date must be after minimum allowed date
             </mat-error>
-            <mat-error *ngIf="hasFieldError(field.id, 'matDatepickerMax')">
+            }
+            @if (hasFieldError(field.id, 'matDatepickerMax')) {
+            <mat-error>
               Date must be before maximum allowed date
             </mat-error>
+            }
           </mat-form-field>
+          }
 
           <!-- Checkbox -->
-          <div *ngIf="field.type === 'checkbox'" class="checkbox-field">
+          @if (field.type === 'checkbox') {
+          <div class="checkbox-field">
             <mat-checkbox 
               [formControlName]="field.id" 
               [disabled]="isFieldDisabled(field)">
               {{ field.label }}
             </mat-checkbox>
-            <div *ngIf="field.attributes?.hint" class="field-hint">{{ getFieldAttribute(field, 'hint') }}</div>
+            @if (field.attributes?.hint) {
+            <div class="field-hint">{{ getFieldAttribute(field, 'hint') }}</div>
+            }
           </div>
+          }
 
         </div>
+        }
       </div>
     </div>
   </mat-expansion-panel>

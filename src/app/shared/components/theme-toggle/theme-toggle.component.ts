@@ -1,71 +1,118 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { ThemeService, type ThemeMode } from '../../services/theme.service';
 
 @Component({
   selector: 'app-theme-toggle',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule
   ],
   template: `
-    <button
-      mat-icon-button
-      [matTooltip]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
-      (click)="toggleTheme()"
+    <button 
+      mat-icon-button 
+      [matMenuTriggerFor]="themeMenu"
+      [matTooltip]="tooltipText()"
       class="theme-toggle-button">
-      <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      <mat-icon>{{ themeIcon() }}</mat-icon>
     </button>
+    
+    <mat-menu #themeMenu="matMenu">
+      <button 
+        mat-menu-item 
+        (click)="setTheme('light')"
+        [class.active]="themeService.themeMode() === 'light'">
+        <mat-icon>light_mode</mat-icon>
+        <span>Light</span>
+      </button>
+      
+      <button 
+        mat-menu-item 
+        (click)="setTheme('dark')"
+        [class.active]="themeService.themeMode() === 'dark'">
+        <mat-icon>dark_mode</mat-icon>
+        <span>Dark</span>
+      </button>
+      
+      <button 
+        mat-menu-item 
+        (click)="setTheme('auto')"
+        [class.active]="themeService.themeMode() === 'auto'">
+        <mat-icon>brightness_auto</mat-icon>
+        <span>System</span>
+      </button>
+    </mat-menu>
   `,
   styles: [`
     .theme-toggle-button {
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
+      color: var(--mat-sys-on-surface-variant);
+      
+      &:hover {
+        color: var(--mat-sys-primary);
+        transform: scale(1.05);
+      }
     }
     
-    .theme-toggle-button:hover {
-      transform: scale(1.1);
+    .active {
+      background-color: var(--mat-sys-primary-container);
+      color: var(--mat-sys-on-primary-container);
     }
   `]
 })
 export class ThemeToggleComponent {
-  private document = inject(DOCUMENT);
+  protected readonly themeService = inject(ThemeService);
   
-  // Signal for reactive dark mode state
-  isDarkMode = signal(this.document.documentElement.classList.contains('dark'));
-
-  toggleTheme(): void {
-    const isDark = this.isDarkMode();
+  // Computed values based on theme service
+  protected readonly themeIcon = computed(() => {
+    const mode = this.themeService.themeMode();
+    const applied = this.themeService.appliedTheme();
     
-    if (isDark) {
-      // Switch to light mode
-      this.document.documentElement.classList.remove('dark');
-      this.document.body.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      // Switch to dark mode
-      this.document.documentElement.classList.add('dark');
-      this.document.body.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+    switch (mode) {
+      case 'light':
+        return 'light_mode';
+      case 'dark':
+        return 'dark_mode';
+      case 'auto':
+      default:
+        return applied === 'dark' ? 'dark_mode' : 'light_mode';
     }
+  });
+  
+  protected readonly tooltipText = computed(() => {
+    const mode = this.themeService.themeMode();
+    const applied = this.themeService.appliedTheme();
     
-    // Update signal
-    this.isDarkMode.set(!isDark);
+    switch (mode) {
+      case 'light':
+        return 'Theme: Light';
+      case 'dark':
+        return 'Theme: Dark';
+      case 'auto':
+      default:
+        return `Theme: System (${applied})`;
+    }
+  });
+  
+  /**
+   * Set the theme mode
+   */
+  setTheme(mode: ThemeMode): void {
+    this.themeService.setThemeMode(mode);
   }
-
-  constructor() {
-    // Initialize theme from localStorage on component init
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      this.document.documentElement.classList.add('dark');
-      this.document.body.classList.add('dark');
-      this.isDarkMode.set(true);
-    }
+  
+  /**
+   * Toggle between light and dark (ignores auto)
+   */
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 }

@@ -24,17 +24,20 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { FormSectionComponent } from '../../components/form-section/form-section.component';
-import { TicketDetailHeaderComponent } from '../../components/ticket-detail-header/ticket-detail-header.component';
 import { TicketSummaryComponent } from '../../components/ticket-summary/ticket-summary.component';
 
 import { DynamicFormService } from '../../../../shared/services/dynamic-form.service';
+import { HistoryService } from '../../../../shared/services/history.service';
+import { MockDataService } from '../../../../shared/services/mock-data.service';
 import { 
   FormSchema, 
   Ticket, 
   TicketStatus, 
   FormSubmissionData, 
-  AsyncOperation 
+  AsyncOperation,
+  Comment
 } from '../../../../shared/models';
+import { HistoryItem } from '../../../../shared/models/history.interface';
 
 @Component({
     selector: 'app-ticket-detail',
@@ -62,7 +65,6 @@ import {
         MatMenuModule,
         MatDialogModule,
         FormSectionComponent,
-        TicketDetailHeaderComponent,
         TicketSummaryComponent
     ],
     templateUrl: './ticket-detail.component.html',
@@ -72,6 +74,8 @@ import {
 export class TicketDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private dynamicFormService = inject(DynamicFormService);
+  private historyService = inject(HistoryService);
+  private mockDataService = inject(MockDataService); // TODO: Replace with actual API services
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
@@ -119,63 +123,18 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   // Draft saving state
   isDraftSaving = false;
   
-  // Comments state
+  // Comments state - now loaded from MockDataService
+  // TODO: Replace with actual CommentService
   newComment = '';
-  mockComments = [
-    {
-      id: 1,
-      author: 'Sarah Johnson',
-      timestamp: '2 hours ago',
-      text: "I've started the onboarding process for John Smith. All documentation has been prepared and sent to the new hire.",
-      isInternal: false
-    },
-    {
-      id: 2,
-      author: 'Mike Chen',
-      timestamp: '1 hour ago',
-      text: "Thanks Sarah! I've scheduled the orientation session for tomorrow at 10 AM. The conference room is booked.",
-      isInternal: true
-    },
-    {
-      id: 3,
-      author: 'John Smith',
-      timestamp: '30 minutes ago',
-      text: 'Looking forward to starting! I have a question about the parking arrangements.',
-      isInternal: false
-    }
-  ];
+  mockComments: Comment[] = [];
   
   // History state
-  mockHistory = [
-    {
-      id: 1,
-      action: 'Ticket Created',
-      actor: 'Jane Doe',
-      timestamp: 'Jan 15, 2024, 10:00 AM',
-      details: 'Employee onboarding request submitted for John Smith'
-    },
-    {
-      id: 2,
-      action: 'Assigned to Mike Chen',
-      actor: 'System',
-      timestamp: 'Jan 15, 2024, 10:05 AM',
-      details: 'Ticket automatically assigned based on workload and expertise'
-    },
-    {
-      id: 3,
-      action: 'Status changed to On Track',
-      actor: 'Mike Chen',
-      timestamp: 'Jan 16, 2024, 9:30 AM',
-      details: 'Initial review completed, proceeding with onboarding checklist'
-    },
-    {
-      id: 4,
-      action: 'Documents Uploaded',
-      actor: 'Sarah Johnson',
-      timestamp: 'Jan 16, 2024, 2:15 PM',
-      details: 'Employment contract and handbook uploaded to employee portal'
-    }
-  ];
+  historyItems = this.historyService.getHistorySignal();
+  
+  // Computed property for history count
+  get historyCount(): number {
+    return this.historyItems().length;
+  }
   
   ngOnInit(): void {
     this.initializeComponent();
@@ -206,63 +165,88 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load ticket data and form schema
+   * Load ticket data and form schema using centralized MockDataService
+   * TODO: Replace MockDataService calls with actual API service calls
    */
   async loadTicketData(): Promise<void> {
     try {
-      // TODO: Replace with actual API service calls
-      // For now, using mock data to demonstrate the component structure
+      // Load ticket data using MockDataService
+      // TODO: Replace with actual TicketService.getTicketById(ticketId)
+      this.mockDataService.getTicketById(this.ticketId).subscribe({
+        next: (ticket) => {
+          this.ticket = ticket;
+          this.ticketOperation = { isLoading: false, data: ticket };
+          
+          // Populate form with existing data after ticket is loaded
+          if (this.dynamicForm && ticket.formData) {
+            this.dynamicFormService.populateForm(this.dynamicForm, ticket.formData);
+          }
+          
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.ticketOperation = { 
+            isLoading: false, 
+            error: {
+              id: 'error_001',
+              type: 'network',
+              code: 'LOAD_TICKET_FAILED',
+              message: 'Failed to load ticket data',
+              timestamp: new Date()
+            }
+          };
+          this.handleError('Failed to load ticket data', error);
+          this.cdr.detectChanges();
+        }
+      });
       
-      // Simulate API calls
-      await this.simulateAsyncOperation(800);
+      // Load form schema using MockDataService
+      // TODO: Replace with actual FormSchemaService.getFormSchema(schemaId)
+      this.mockDataService.getFormSchema('schema_001').subscribe({
+        next: (schema) => {
+          this.formSchema = schema;
+          this.schemaOperation = { isLoading: false, data: schema };
+          
+          // Create dynamic form after schema is loaded
+          this.createDynamicForm();
+          
+          // Setup auto-save if enabled
+          if (this.autoSaveEnabled) {
+            this.setupAutoSave();
+          }
+          
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.schemaOperation = { 
+            isLoading: false, 
+            error: {
+              id: 'error_002',
+              type: 'network',
+              code: 'LOAD_SCHEMA_FAILED',
+              message: 'Failed to load form schema',
+              timestamp: new Date()
+            }
+          };
+          this.handleError('Failed to load form schema', error);
+          this.cdr.detectChanges();
+        }
+      });
       
-      // Mock ticket data
-      this.ticket = this.createMockTicket();
-      this.ticketOperation = { isLoading: false, data: this.ticket };
-      
-      // Mock form schema
-      this.formSchema = this.createMockFormSchema();
-      this.schemaOperation = { isLoading: false, data: this.formSchema };
-      
-      // Create dynamic form
-      this.createDynamicForm();
-      
-      // Populate form with existing data
-      if (this.dynamicForm && this.ticket.formData) {
-        this.dynamicFormService.populateForm(this.dynamicForm, this.ticket.formData);
-      }
-      
-      // Setup auto-save if enabled
-      if (this.autoSaveEnabled) {
-        this.setupAutoSave();
-      }
-      
-      // Trigger change detection
-      this.cdr.detectChanges();
+      // Load comments using MockDataService
+      // TODO: Replace with actual CommentService.getTicketComments(ticketId)
+      this.mockDataService.getTicketComments(this.ticketId).subscribe({
+        next: (comments) => {
+          this.mockComments = comments;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Failed to load comments:', error);
+        }
+      });
       
     } catch (error) {
-      this.ticketOperation = { 
-        isLoading: false, 
-        error: {
-          id: 'error_001',
-          type: 'network',
-          code: 'LOAD_TICKET_FAILED',
-          message: 'Failed to load ticket data',
-          timestamp: new Date()
-        }
-      };
-      this.schemaOperation = { 
-        isLoading: false, 
-        error: {
-          id: 'error_002',
-          type: 'network',
-          code: 'LOAD_SCHEMA_FAILED',
-          message: 'Failed to load form schema',
-          timestamp: new Date()
-        }
-      };
-      this.handleError('Failed to load ticket data', error);
-      this.cdr.detectChanges();
+      this.handleError('Failed to initialize data loading', error);
     }
   }
 
@@ -352,7 +336,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle form submission
+   * Handle form submission using MockDataService
+   * TODO: Replace with actual TicketService.saveTicket(ticketId, formData)
    */
   async onSubmit(): Promise<void> {
     if (!this.dynamicForm || !this.formSchema) return;
@@ -368,12 +353,30 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       
       const formData = this.dynamicFormService.convertToSubmissionData(this.dynamicForm);
       
-      // TODO: Replace with actual API service call
-      await this.simulateAsyncOperation(1000);
-      
-      this.saveOperation = { isLoading: false };
-      this.dynamicForm.markAsPristine();
-      this.showSuccess('Ticket saved successfully');
+      // Use MockDataService to save ticket
+      this.mockDataService.saveTicket(this.ticketId, formData).subscribe({
+        next: (updatedTicket) => {
+          this.ticket = updatedTicket;
+          this.saveOperation = { isLoading: false, data: updatedTicket };
+          this.dynamicForm!.markAsPristine();
+          this.showSuccess('Ticket saved successfully');
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.saveOperation = { 
+            isLoading: false, 
+            error: {
+              id: 'error_003',
+              type: 'network',
+              code: 'SAVE_TICKET_FAILED',
+              message: 'Failed to save ticket',
+              timestamp: new Date()
+            }
+          };
+          this.handleError('Failed to save ticket', error);
+          this.cdr.detectChanges();
+        }
+      });
       
     } catch (error) {
       this.saveOperation = { 
@@ -391,7 +394,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Save as draft
+   * Save as draft using MockDataService
+   * TODO: Replace with actual TicketService.saveDraft(ticketId, formData)
    */
   async saveDraft(): Promise<void> {
     if (!this.dynamicForm) return;
@@ -402,19 +406,26 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       
       const formData = this.dynamicFormService.convertToSubmissionData(this.dynamicForm);
       
-      // TODO: Replace with actual API service call
-      await this.simulateAsyncOperation(500);
-      
-      this.isDraftSaving = false;
-      this.dynamicForm.markAsPristine();
-      this.showInfo('Draft saved');
+      // Use MockDataService to save draft
+      this.mockDataService.saveDraft(this.ticketId, formData).subscribe({
+        next: () => {
+          this.isDraftSaving = false;
+          this.dynamicForm!.markAsPristine();
+          this.showInfo('Draft saved');
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.isDraftSaving = false;
+          console.error('Failed to save draft:', error);
+          this.cdr.detectChanges();
+        }
+      });
       
     } catch (error) {
       this.isDraftSaving = false;
       console.error('Failed to save draft:', error);
+      this.cdr.detectChanges();
     }
-
-    this.cdr.detectChanges();
   }
 
   /**
@@ -442,9 +453,14 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
     // Load tab data lazily
     if (index === 0) {
       // Comments tab - load comments if not loaded
+      console.log('Comments tab selected');
     } else if (index === 1) {
       // History tab - load history if not loaded
+      console.log('History tab selected');
     }
+    
+    // Trigger change detection
+    this.cdr.detectChanges();
   }
 
   /**
@@ -535,604 +551,53 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
     return new Promise(resolve => setTimeout(resolve, delay));
   }
 
-  /**
-   * Create mock ticket data (replace with actual API service)
-   */
-  private createMockTicket(): Ticket {
-    const now = new Date();
-    const createdDate = new Date('2024-01-15T10:30:00Z');
-    
-    // Create mock TicketType
-    const mockTicketType = {
-      id: 'tt_support_001',
-      createdAt: createdDate,
-      createdBy: 'system',
-      updatedAt: createdDate,
-      version: 1,
-      name: 'employee_onboarding',
-      description: 'Employee onboarding process',
-      icon: 'person_add',
-      color: '#4CAF50',
-      isActive: true,
-      formSchemaId: 'schema_001',
-      workflow: {
-        initialStatus: 'open' as TicketStatus,
-        allowedTransitions: [
-          {
-            from: 'open' as TicketStatus,
-            to: ['in_progress' as TicketStatus, 'closed' as TicketStatus],
-            conditions: {},
-            requiredPermissions: ['ticket.update']
-          }
-        ]
-      }
-    };
 
-    // Create mock users
-    const mockAssignedUser = {
-      id: 'user_002',
-      createdAt: createdDate,
-      createdBy: 'system',
-      updatedAt: createdDate,
-      version: 1,
-      username: 'jane.smith',
-      email: 'jane.smith@example.com',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      displayName: 'Jane Smith',
-      name: 'Jane Smith',
-      avatar: 'https://via.placeholder.com/40',
-      roles: ['agent'],
-      department: 'HR',
-      isActive: true,
-      preferences: {
-        notifications: true,
-        emailUpdates: true,
-        theme: 'light' as const,
-        language: 'en'
-      }
-    };
-
-    // Create mock tags
-    const mockTags = [
-      {
-        id: 'tag_001',
-        createdAt: createdDate,
-        createdBy: 'system',
-        updatedAt: createdDate,
-        version: 1,
-        name: 'urgent',
-        slug: 'urgent',
-        color: '#ff6b6b',
-        backgroundColor: '#ffebee',
-        textColor: '#d32f2f',
-        description: 'Urgent priority ticket',
-        isSystemTag: true,
-        sortOrder: 1,
-        usageCount: 45
-      },
-      {
-        id: 'tag_002',
-        createdAt: createdDate,
-        createdBy: 'system',
-        updatedAt: createdDate,
-        version: 1,
-        name: 'customer-facing',
-        slug: 'customer-facing',
-        color: '#4ecdc4',
-        backgroundColor: '#e0f7fa',
-        textColor: '#00695c',
-        description: 'Customer facing ticket',
-        isSystemTag: false,
-        sortOrder: 2,
-        usageCount: 23
-      }
-    ];
-
-    return {
-      // Base entity fields
-      id: this.ticketId,
-      createdAt: createdDate,
-      createdBy: 'user_001', // User ID reference
-      updatedAt: now,
-      updatedBy: 'user_002',
-      version: 1,
-      isDeleted: false,
-      
-      // Ticket fields
-      ticketNumber: 'TICK-2024-001',
-      title: 'Employee Onboarding - John Smith',
-      description: 'Complete onboarding process for new hire John Smith',
-      status: 'open',
-      statusHistory: [
-        {
-          status: 'open',
-          changedAt: createdDate,
-          changedBy: 'user_001',
-          reason: 'Initial ticket creation'
-        }
-      ],
-      
-      priority: 'medium',
-      priorityHistory: [
-        {
-          priority: 'medium',
-          changedAt: createdDate,
-          changedBy: 'user_001',
-          reason: 'Initial priority assignment'
-        }
-      ],
-      
-      type: mockTicketType,
-      category: 'hr',
-      subcategory: 'onboarding',
-      
-      // People and assignment
-      createdByUser: {
-        id: 'user_001',
-        createdAt: createdDate,
-        createdBy: 'system',
-        updatedAt: createdDate,
-        version: 1,
-        username: 'john.doe',
-        email: 'john.doe@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        displayName: 'John Doe',
-        name: 'John Doe',
-        avatar: 'https://via.placeholder.com/40',
-        roles: ['user'],
-        department: 'Engineering',
-        isActive: true,
-        preferences: {
-          notifications: true,
-          emailUpdates: true,
-          theme: 'light' as const,
-          language: 'en'
-        }
-      },
-      assignedTo: mockAssignedUser,
-      assignedToId: mockAssignedUser.id,
-      assignmentHistory: [
-        {
-          assignedTo: mockAssignedUser.id,
-          assignedAt: createdDate,
-          assignedBy: 'user_001',
-          reason: 'Auto-assigned based on workload'
-        }
-      ],
-      
-      watchers: ['user_003', 'user_004'],
-      
-      // Timestamps
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      estimatedResolutionTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-      
-      // SLA tracking
-      slaHistory: [
-        {
-          event: 'started',
-          timestamp: createdDate,
-          reason: 'Ticket created and SLA timer started'
-        }
-      ],
-      
-      // Organization and relationships
-      tags: mockTags,
-      childTicketIds: [],
-      relatedTicketIds: [],
-      duplicates: [],
-      
-      // Form data
-      formData: {
-        basic_information: {
-          ticket_id: '#1234',
-          process_type: 'employee_onboarding',
-          client: 'Acme Corp',
-          priority_level: 'medium',
-          due_date: '2024-02-15'
-        },
-        employee_details: {
-          full_name: 'John Smith',
-          employee_id: 'EMP-2024-001',
-          email_address: 'john.smith@acmecorp.com',
-          phone_number: '+1 (555) 123-4567',
-          date_of_birth: '1990-05-15',
-          emergency_contact: 'Jane Smith',
-          emergency_phone: '+1 (555) 987-6543'
-        },
-        employment_information: {
-          start_date: '2024-01-22',
-          department: 'engineering',
-          position_title: 'Senior Software Engineer',
-          reporting_manager: 'Sarah Johnson',
-          work_location: 'new_york',
-          employment_type: 'full-time',
-          salary_range: '100k-120k',
-          benefits_eligible: true,
-          additional_notes: 'New hire with 5+ years experience in React and Node.js. Will be working on the core platform team.'
-        },
-        equipment_access: {
-          laptop_type: 'macbook',
-          monitor_needed: true,
-          phone_needed: false,
-          access_systems: 'GitHub, Jira, Confluence, Slack, Google Workspace, AWS Console',
-          special_requirements: ''
-        }
-      },
-      formSchemaId: 'schema_001',
-      formSchemaVersion: '1.0.0',
-      
-      // Metrics
-      metrics: {
-        commentCount: 3,
-        attachmentCount: 2,
-        viewCount: 15,
-        editCount: 2,
-        reopenCount: 0,
-        timeSpentMinutes: 120
-      },
-      
-      // Source and location
-      source: {
-        channel: 'web',
-        origin: 'https://portal.acmecorp.com',
-        userAgent: 'Mozilla/5.0...',
-        ipAddress: '192.168.1.100'
-      },
-      
-      location: {
-        country: 'United States',
-        region: 'New York',
-        city: 'New York',
-        timezone: 'America/New_York'
-      },
-      
-      // Flags
-      flags: {
-        isLocked: false,
-        isArchived: false,
-        isFlagged: false,
-        isUrgent: false,
-        isEscalated: false,
-        isOverdue: false,
-        hasUnreadComments: true,
-        requiresAttention: false
-      },
-      
-      // Custom fields
-      customFields: {
-        client: 'Acme Corp',
-        cost_center: 'CC-001',
-        project_code: 'PROJ-2024-001'
-      },
-      
-      labels: ['new-hire', 'high-priority', 'onboarding']
-    };
-  }
 
   /**
-   * Create comprehensive mock form schema (replace with actual API service)
-   */
-  private createMockFormSchema(): FormSchema {
-    return {
-      id: 'employee_onboarding_v1',
-      title: 'Employee Onboarding - John Smith',
-      description: 'Complete employee onboarding form',
-      sections: [
-        {
-          id: 'basic_information',
-          title: 'Basic Information',
-          collapsible: true,
-          collapsed: false,
-          repeatable: false,
-          fields: [
-            {
-              id: 'ticket_id',
-              label: 'Ticket ID',
-              type: 'text',
-              default: '#1234',
-              readOnly: true,
-              validators: []
-            },
-            {
-              id: 'process_type',
-              label: 'Process Type',
-              type: 'select',
-              default: 'employee_onboarding',
-              options: [
-                { value: 'employee_onboarding', label: 'Employee Onboarding' },
-                { value: 'employee_offboarding', label: 'Employee Offboarding' },
-                { value: 'role_change', label: 'Role Change' },
-                { value: 'department_transfer', label: 'Department Transfer' }
-              ],
-              validators: [{ name: 'required', message: 'Process type is required' }]
-            },
-            {
-              id: 'client',
-              label: 'Client/Organization',
-              type: 'text',
-              default: 'Acme Corp',
-              validators: [{ name: 'required', message: 'Client name is required' }]
-            },
-            {
-              id: 'priority_level',
-              label: 'Priority Level',
-              type: 'radio',
-              default: 'medium',
-              options: [
-                { value: 'low', label: 'Low' },
-                { value: 'medium', label: 'Medium' },
-                { value: 'high', label: 'High' },
-                { value: 'urgent', label: 'Urgent' }
-              ],
-              validators: [{ name: 'required', message: 'Priority level is required' }]
-            },
-            {
-              id: 'due_date',
-              label: 'Due Date',
-              type: 'date',
-              default: '2024-02-15',
-              validators: [{ name: 'required', message: 'Due date is required' }]
-            }
-          ]
-        },
-        {
-          id: 'employee_details',
-          title: 'Employee Details',
-          collapsible: true,
-          collapsed: true,
-          repeatable: false,
-          fields: [
-            {
-              id: 'full_name',
-              label: 'Full Name',
-              type: 'text',
-              default: 'John Smith',
-              placeholder: 'Enter full name',
-              validators: [
-                { name: 'required', message: 'Full name is required' },
-                { name: 'minlength', message: 'Name must be at least 2 characters', value: 2 }
-              ]
-            },
-            {
-              id: 'employee_id',
-              label: 'Employee ID',
-              type: 'text',
-              default: 'EMP-2024-001',
-              placeholder: 'e.g., EMP-2024-001',
-              validators: [{ name: 'required', message: 'Employee ID is required' }]
-            },
-            {
-              id: 'email_address',
-              label: 'Email Address',
-              type: 'text',
-              default: 'john.smith@acmecorp.com',
-              placeholder: 'Enter email address',
-              validators: [
-                { name: 'required', message: 'Email address is required' },
-                { name: 'email', message: 'Please enter a valid email address' }
-              ]
-            },
-            {
-              id: 'phone_number',
-              label: 'Phone Number',
-              type: 'text',
-              default: '+1 (555) 123-4567',
-              placeholder: '+1 (555) 000-0000',
-              validators: [{ name: 'required', message: 'Phone number is required' }]
-            },
-            {
-              id: 'date_of_birth',
-              label: 'Date of Birth',
-              type: 'date',
-              default: '1990-05-15',
-              validators: [{ name: 'required', message: 'Date of birth is required' }]
-            },
-            {
-              id: 'emergency_contact',
-              label: 'Emergency Contact Name',
-              type: 'text',
-              default: 'Jane Smith',
-              placeholder: 'Emergency contact full name',
-              validators: [{ name: 'required', message: 'Emergency contact is required' }]
-            },
-            {
-              id: 'emergency_phone',
-              label: 'Emergency Contact Phone',
-              type: 'text',
-              default: '+1 (555) 987-6543',
-              placeholder: '+1 (555) 000-0000',
-              validators: [{ name: 'required', message: 'Emergency contact phone is required' }]
-            }
-          ]
-        },
-        {
-          id: 'employment_information',
-          title: 'Employment Information',
-          collapsible: true,
-          collapsed: true,
-          repeatable: false,
-          fields: [
-            {
-              id: 'start_date',
-              label: 'Start Date',
-              type: 'date',
-              default: '2024-01-22',
-              validators: [{ name: 'required', message: 'Start date is required' }]
-            },
-            {
-              id: 'department',
-              label: 'Department',
-              type: 'select',
-              default: 'engineering',
-              options: [
-                { value: '', label: 'Select Department' },
-                { value: 'engineering', label: 'Engineering' },
-                { value: 'product', label: 'Product Management' },
-                { value: 'design', label: 'Design & UX' },
-                { value: 'marketing', label: 'Marketing' },
-                { value: 'sales', label: 'Sales' },
-                { value: 'hr', label: 'Human Resources' },
-                { value: 'finance', label: 'Finance' },
-                { value: 'operations', label: 'Operations' },
-                { value: 'support', label: 'Customer Support' }
-              ],
-              validators: [{ name: 'required', message: 'Department is required' }]
-            },
-            {
-              id: 'position_title',
-              label: 'Position/Title',
-              type: 'text',
-              default: 'Senior Software Engineer',
-              placeholder: 'Enter job title',
-              validators: [{ name: 'required', message: 'Position title is required' }]
-            },
-            {
-              id: 'reporting_manager',
-              label: 'Reporting Manager',
-              type: 'text',
-              default: 'Sarah Johnson',
-              placeholder: 'Enter manager name',
-              validators: [{ name: 'required', message: 'Reporting manager is required' }]
-            },
-            {
-              id: 'work_location',
-              label: 'Work Location',
-              type: 'select',
-              default: 'new_york',
-              options: [
-                { value: '', label: 'Select Location' },
-                { value: 'new_york', label: 'New York Office' },
-                { value: 'san_francisco', label: 'San Francisco Office' },
-                { value: 'chicago', label: 'Chicago Office' },
-                { value: 'remote', label: 'Remote' },
-                { value: 'hybrid', label: 'Hybrid' }
-              ],
-              validators: [{ name: 'required', message: 'Work location is required' }]
-            },
-            {
-              id: 'employment_type',
-              label: 'Employment Type',
-              type: 'radio',
-              default: 'full-time',
-              options: [
-                { value: 'full-time', label: 'Full-time' },
-                { value: 'part-time', label: 'Part-time' },
-                { value: 'contract', label: 'Contract' },
-                { value: 'intern', label: 'Internship' }
-              ],
-              validators: [{ name: 'required', message: 'Employment type is required' }]
-            },
-            {
-              id: 'salary_range',
-              label: 'Salary Range',
-              type: 'select',
-              default: '100k-120k',
-              options: [
-                { value: '', label: 'Select Salary Range' },
-                { value: '40k-60k', label: '$40,000 - $60,000' },
-                { value: '60k-80k', label: '$60,000 - $80,000' },
-                { value: '80k-100k', label: '$80,000 - $100,000' },
-                { value: '100k-120k', label: '$100,000 - $120,000' },
-                { value: '120k-150k', label: '$120,000 - $150,000' },
-                { value: '150k+', label: '$150,000+' }
-              ],
-              validators: [{ name: 'required', message: 'Salary range is required' }]
-            },
-            {
-              id: 'benefits_eligible',
-              label: 'Eligible for Benefits',
-              type: 'checkbox',
-              default: true,
-              validators: []
-            },
-            {
-              id: 'additional_notes',
-              label: 'Additional Notes',
-              type: 'textarea',
-              default: 'New hire with 5+ years experience in React and Node.js. Will be working on the core platform team.',
-              placeholder: 'Enter any additional information, special requirements, or notes...',
-              attributes: { rows: 4 },
-              validators: []
-            }
-          ]
-        },
-        {
-          id: 'equipment_access',
-          title: 'Equipment & Access Requirements',
-          collapsible: true,
-          collapsed: true,
-          repeatable: false,
-          fields: [
-            {
-              id: 'laptop_type',
-              label: 'Laptop Preference',
-              type: 'radio',
-              default: 'macbook',
-              options: [
-                { value: 'macbook', label: 'MacBook Pro' },
-                { value: 'windows', label: 'Windows Laptop' },
-                { value: 'linux', label: 'Linux Laptop' }
-              ],
-              validators: [{ name: 'required', message: 'Laptop preference is required' }]
-            },
-            {
-              id: 'monitor_needed',
-              label: 'External Monitor Required',
-              type: 'checkbox',
-              default: true,
-              validators: []
-            },
-            {
-              id: 'phone_needed',
-              label: 'Company Phone Required',
-              type: 'checkbox',
-              default: false,
-              validators: []
-            },
-            {
-              id: 'access_systems',
-              label: 'Required System Access',
-              type: 'textarea',
-              default: 'GitHub, Jira, Confluence, Slack, Google Workspace, AWS Console',
-              placeholder: 'List all systems and tools the employee needs access to...',
-              attributes: { rows: 3 },
-              validators: []
-            },
-            {
-              id: 'special_requirements',
-              label: 'Special Equipment Requirements',
-              type: 'textarea',
-              default: '',
-              placeholder: 'Any special equipment, software, or accessibility requirements...',
-              attributes: { rows: 3 },
-              validators: []
-            }
-          ]
-        }
-      ]
-    } as FormSchema;
-  }
-
-  /**
-   * Add a new comment
+   * Add a new comment using MockDataService
+   * TODO: Replace with actual CommentService.addComment(ticketId, commentText, isInternal)
    */
   addComment(): void {
     if (!this.newComment?.trim()) return;
 
-    const newCommentObj = {
-      id: this.mockComments.length + 1,
-      author: 'John Doe', // Current user
-      timestamp: 'Just now',
-      text: this.newComment.trim(),
-      isInternal: false
-    };
+    const commentText = this.newComment.trim();
+    
+    // Use MockDataService to add comment
+    this.mockDataService.addComment(this.ticketId, commentText, false).subscribe({
+      next: (newComment) => {
+        this.mockComments.unshift(newComment);
+        
+        // Add history entry for the comment
+        this.addHistoryItem('Comment Added', newComment.author, `Comment: "${commentText}"`);    
+        
+        this.newComment = '';
+        this.showSuccess('Comment added successfully');
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to add comment:', error);
+        this.showError('Failed to add comment');
+      }
+    });
+  }
 
-    this.mockComments.unshift(newCommentObj);
-    this.newComment = '';
-    this.showSuccess('Comment added successfully');
-    this.cdr.detectChanges();
+  /**
+   * Add a new history item to the timeline
+   */
+  private addHistoryItem(action: string, actor: string, details?: string): void {
+    this.historyService.addHistoryItem(this.ticketId, {
+      action,
+      actor,
+      details
+    }).subscribe({
+      next: () => {
+        // History is automatically updated via signal
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to add history item:', error);
+      }
+    });
   }
 
   /**

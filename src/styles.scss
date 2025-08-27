@@ -1,157 +1,13 @@
-/* Angular Material Theme - Generated from https://themes.angular-material.dev/ */
-/* Seed Colors: primary: #3b82f6, secondary: #b1c6f9, tertiary: #f4aeff, error: #ffb4ab, neutral: #757780, neutral-variant: #727785 */
-/* Seed Typography: plain-font-family: Roboto, brand-font-family: Roboto, bold-font-weight: 700, medium-font-weight: 500, regular-font-weight: 400 */
+// Use our custom Azure-themed Material Design system
+@use './theme.scss';
 
-@use "@angular/material" as mat;
-
-// Tailwind CSS imports
+// Tailwind CSS imports (after Material theme)
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-// Include Material Core
-@include mat.elevation-classes();
-@include mat.app-background();
-
-/* Light Theme */
-:root, :host {
-  @include mat.theme-overrides((
-    primary: #005ac2,
-    on-primary: #ffffff,
-    primary-container: #d8e2ff,
-    on-primary-container: #001a42,
-    inverse-primary: #adc6ff,
-    primary-fixed: #d8e2ff,
-    primary-fixed-dim: #adc6ff,
-    on-primary-fixed: #001a42,
-    on-primary-fixed-variant: #004395,
-    secondary: #495e8b,
-    on-secondary: #ffffff,
-    secondary-container: #d8e2ff,
-    on-secondary-container: #001a42,
-    secondary-fixed: #d8e2ff,
-    secondary-fixed-dim: #b1c6f9,
-    on-secondary-fixed: #001a42,
-    on-secondary-fixed-variant: #314671,
-    tertiary: #82478f,
-    on-tertiary: #ffffff,
-    tertiary-container: #fdd6ff,
-    on-tertiary-container: #340042,
-    tertiary-fixed: #fdd6ff,
-    tertiary-fixed-dim: #f4aeff,
-    on-tertiary-fixed: #340042,
-    on-tertiary-fixed-variant: #682e76,
-    background: #fcf8f9,
-    on-background: #1c1b1c,
-    surface: #fcf8f9,
-    surface-dim: #dcd9d9,
-    surface-bright: #fcf8f9,
-    surface-container-lowest: #ffffff,
-    surface-container-low: #f6f3f3,
-    surface-container: #f1eded,
-    surface-container-high: #ebe7e8,
-    surface-container-highest: #e5e2e2,
-    on-surface: #1c1b1c,
-    shadow: #000000,
-    scrim: #000000,
-    surface-tint: #5c5e67,
-    inverse-surface: #313031,
-    inverse-on-surface: #f3f0f0,
-    outline: #76777c,
-    outline-variant: #c6c6cc,
-    neutral: #797777,
-    neutral10: #1c1b1c,
-    error: #ba1a1a,
-    error-container: #ffdad6,
-    on-error: #ffffff,
-    on-error-container: #410002,
-    surface-variant: #e2e2e8,
-    on-surface-variant: #45474c,
-    neutral-variant: #76777c,
-    neutral-variant20: #2f3035,
-    inverse-secondary: #b1c6f9,
-    inverse-tertiary: #f4aeff,
-  ));
-}
-
-/* Dark Theme */
-.dark {
-  @include mat.theme-overrides((
-    primary: #adc6ff,
-    on-primary: #002e6a,
-    primary-container: #004395,
-    on-primary-container: #d8e2ff,
-    inverse-primary: #005ac2,
-    primary-fixed: #d8e2ff,
-    primary-fixed-dim: #adc6ff,
-    on-primary-fixed: #001a42,
-    on-primary-fixed-variant: #004395,
-    secondary: #b1c6f9,
-    on-secondary: #192f59,
-    secondary-container: #314671,
-    on-secondary-container: #d8e2ff,
-    secondary-fixed: #d8e2ff,
-    secondary-fixed-dim: #b1c6f9,
-    on-secondary-fixed: #001a42,
-    on-secondary-fixed-variant: #314671,
-    tertiary: #f4aeff,
-    on-tertiary: #4f155d,
-    tertiary-container: #682e76,
-    on-tertiary-container: #fdd6ff,
-    tertiary-fixed: #fdd6ff,
-    tertiary-fixed-dim: #f4aeff,
-    on-tertiary-fixed: #340042,
-    on-tertiary-fixed-variant: #682e76,
-    background: #131314,
-    on-background: #e5e2e2,
-    surface: #131314,
-    surface-dim: #131314,
-    surface-bright: #3a3939,
-    surface-container-lowest: #0e0e0f,
-    surface-container-low: #1c1b1c,
-    surface-container: #201f20,
-    surface-container-high: #2a2a2a,
-    surface-container-highest: #353435,
-    on-surface: #e5e2e2,
-    shadow: #000000,
-    scrim: #000000,
-    surface-tint: #c5c6d0,
-    inverse-surface: #e5e2e2,
-    inverse-on-surface: #313031,
-    outline: #909095,
-    outline-variant: #45474c,
-    neutral: #797777,
-    neutral10: #1c1b1c,
-    error: #ffb4ab,
-    error-container: #93000a,
-    on-error: #690005,
-    on-error-container: #ffdad6,
-    surface-variant: #45474c,
-    on-surface-variant: #c6c6cc,
-    neutral-variant: #76777c,
-    neutral-variant20: #2f3035,
-    inverse-secondary: #495e8b,
-    inverse-tertiary: #82478f,
-  ));
-}
-
-/* Typography */
-:root, :host {
-  /* Core typography tokens */
-  --mat-sys-brand-font-family: Roboto;
-  --mat-sys-plain-font-family: Roboto;
-  --mat-sys-bold-font-weight: 700;
-  --mat-sys-medium-font-weight: 500;
-  --mat-sys-regular-font-weight: 400;
-
-  @include mat.theme-overrides((
-    brand-family: Roboto,
-    plain-family: Roboto,
-    bold-weight: 700,
-    medium-weight: 500,
-    regular-weight: 400,
-  ));
-}
+// Material Design components will automatically use theme tokens
+// Only keep essential fixes for Tailwind conflicts
 
 // Essential custom properties for backwards compatibility
 :root {
@@ -160,10 +16,91 @@
   --primary-blue-light: #adc6ff;
   --primary-blue-dark: #004395;
   
-  // Component-specific colors
+  // Semantic colors
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+  
+  // Background colors
+  --bg-primary: #fcf8f9;
+  --bg-secondary: #f6f3f3;
+  --bg-surface: #ffffff;
   --bg-section: #f6f3f3; // surface-container-low
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-hover: #f8fafc;
+  --bg-selected: #e0e7ff;
+  
+  // Text colors
+  --text-primary: #1c1b1c;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --text-disabled: #d1d5db;
+  --text-inverse: #ffffff;
   --text-accent: var(--primary-blue);
+  --text-success: #059669;
+  --text-warning: #d97706;
+  --text-error: #dc2626;
+  --text-info: #2563eb;
+  
+  // Border colors
+  --border-default: #e5e7eb;
+  --border-light: #f3f4f6;
+  --border-medium: #d1d5db;
+  --border-dark: #9ca3af;
   --border-accent: var(--primary-blue);
+  --border-focus: var(--primary-blue);
+  --border-success: #22c55e;
+  --border-warning: #f59e0b;
+  --border-error: #ef4444;
+  --border-info: #3b82f6;
+  
+  // Status colors
+  --status-draft: #6c757d;
+  --status-submitted: #17a2b8;
+  --status-open: #007bff;
+  --status-assigned: #fd7e14;
+  --status-in-progress: #ffc107;
+  --status-on-hold: #6f42c1;
+  --status-pending-review: #e83e8c;
+  --status-pending-customer: #20c997;
+  --status-resolved: #28a745;
+  --status-closed: #343a40;
+  --status-cancelled: #dc3545;
+  --status-reopened: #fd7e14;
+  
+  // Priority colors
+  --priority-urgent: #dc3545;
+  --priority-high: #fd7e14;
+  --priority-medium: #ffc107;
+  --priority-low: #28a745;
+  --priority-planning: #6c757d;
+  
+  // Component-specific colors
+  --button-primary: var(--primary-blue);
+  --button-secondary: #f8fafc;
+  --button-success: var(--color-success);
+  --button-warning: var(--color-warning);
+  --button-danger: var(--color-error);
+  
+  // Comment colors
+  --comment-bg: #f9fafb;
+  --comment-border: var(--border-default);
+  --comment-author: #374151;
+  --comment-time: var(--text-secondary);
+  --comment-internal-bg: #fef3c7;
+  
+  // Shadow colors
+  --shadow-sm: rgba(0, 0, 0, 0.05);
+  --shadow-md: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
+  --shadow-xl: rgba(0, 0, 0, 0.25);
+  
+  // Overlay colors
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --backdrop-blur: rgba(0, 0, 0, 0.5);
   
   // Legacy spacing aliases for existing components
   --spacing-lg: 1.5rem;
@@ -171,11 +108,16 @@
   --spacing-md: 1rem;
   
   // Component-specific tokens
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
   
   // Material Design z-index values
   --z-dropdown: 1000;
   --z-modal: 1050;
+  --z-tooltip: 1100;
+  --z-overlay: 1200;
 }
 
 // Essential global styles (Tailwind provides the rest)
@@ -200,29 +142,50 @@ app-root {
   border: 0 !important;
 }
 
-// Status badges (keep as these are component-specific)
-.status-badge {
-  @apply inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium uppercase tracking-wide;
-  
-  &.status-success {
-    @apply bg-green-100 text-green-700 border border-green-200;
-  }
-  
-  &.status-warning {
-    @apply bg-yellow-100 text-yellow-700 border border-yellow-200;
-  }
-  
-  &.status-error {
-    @apply bg-red-100 text-red-700 border border-red-200;
-  }
-  
-  &.status-info {
-    @apply bg-blue-100 text-blue-700 border border-blue-200;
-  }
-}
+// Status badges are now defined in theme.scss using Material Design tokens
 
 // Focus styles for accessibility
 .focus-outline:focus,
 .focus-outline:focus-visible {
   @apply ring-2 ring-blue-500 ring-offset-2;
+}
+
+// Fix icon sizing for all Material components
+.mat-mdc-menu-item {
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 0.5rem !important;
+  }
+}
+
+// Fix tab label icons
+.mat-mdc-tab-label {
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 0.5rem !important;
+  }
+}
+
+// Fix any remaining icon issues globally
+mat-icon {
+  font-family: 'Material Icons' !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  direction: ltr !important;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
 }
