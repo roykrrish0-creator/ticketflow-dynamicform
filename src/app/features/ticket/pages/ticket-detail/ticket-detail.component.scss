@@ -143,3 +143,28 @@
     }
   }
 }
+
+// === COMMENT SECTION OVERFLOW FIX ===
+// Prevent comment textarea from causing horizontal scrolling
+.tab-content {
+  max-width: 100%;
+  overflow-x: hidden;
+  
+  // Comment composer container
+  .flex.gap-3 {
+    max-width: 100%;
+    overflow: hidden;
+    
+    .flex-1 {
+      min-width: 0;
+      flex-shrink: 1;
+    }
+    
+    textarea {
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      resize: vertical !important;
+    }
+  }
+}

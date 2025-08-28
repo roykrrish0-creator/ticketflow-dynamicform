@@ -58,25 +58,33 @@
   --border-info: #3b82f6;
   
   // Status colors
-  --status-draft: #6c757d;
   --status-submitted: #17a2b8;
-  --status-open: #007bff;
+  --status-new: #007bff;
   --status-assigned: #fd7e14;
   --status-in-progress: #ffc107;
-  --status-on-hold: #6f42c1;
-  --status-pending-review: #e83e8c;
-  --status-pending-customer: #20c997;
-  --status-resolved: #28a745;
+  --status-manual_review: #20c997;
+  --status-completed: #28a745;
   --status-closed: #343a40;
-  --status-cancelled: #dc3545;
+  --status-failed: #dc3545;
   --status-reopened: #fd7e14;
+
+  // Status Text Colors
+  --status-submitted-text: #fff;
+  --status-new-text: #fff;
+  --status-assigned-text: rgba(0,0,0,0.87);
+  --status-in-progress-text: rgba(0,0,0,0.87);
+  --status-manual_review-text: #fff;
+  --status-completed-text: #fff;
+  --status-closed-text: #fff;
+  --status-failed-text: #fff;
+  --status-reopened-text: rgba(0,0,0,0.87);
+
   
   // Priority colors
   --priority-urgent: #dc3545;
   --priority-high: #fd7e14;
   --priority-medium: #ffc107;
   --priority-low: #28a745;
-  --priority-planning: #6c757d;
   
   // Component-specific colors
   --button-primary: var(--primary-blue);
@@ -188,4 +196,40 @@ mat-icon {
   text-rendering: optimizeLegibility;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'liga';
+}
+
+
+// Helper function: calculate brightness
+@function color-brightness($color) {
+  $r: red($color);
+  $g: green($color);
+  $b: blue($color);
+
+  // W3C recommended luminance formula
+  @return (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+}
+
+// Helper function: return white or dark text
+@function text-color-based-on-bg($color) {
+  @if (color-brightness($color) > 150) {
+    @return rgba(0, 0, 0, 0.87); // dark text for light backgrounds
+  } @else {
+    @return #fff; // white text for dark backgrounds
+  }
+}
+
+// Mixin: apply background + computed text color
+@mixin pill-color($bg-color) {
+  background-color: $bg-color;
+  color: text-color-based-on-bg($bg-color);
+  border-radius: 9999px; // pill shape
+  font-weight: 500;
+  padding: 4px 12px;
+}
+@mixin pill-color($bg-color) {
+  background-color: $bg-color;
+  color: text-color-based-on-bg($bg-color);
+  border-radius: 9999px; // pill shape
+  font-weight: 500;
+  padding: 4px 12px;
 }

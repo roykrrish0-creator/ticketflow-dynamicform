@@ -1,43 +1,13 @@
 /**
- * Common API Response Interfaces
- * Defines the structure for API responses and error handling
+ * API-Specific Interfaces
+ * Contains interfaces specific to API operations not covered by core.types.ts
  */
 
-import { ValidationError, LoadingState } from './core.types';
+import { LoadingState, AppError, UUID, Timestamp } from './core.types';
 
-// ApiResponse is defined in core.types.ts - using that definition
+// Note: ApiResponse, ValidationError, PaginatedResponse are defined in core.types.ts
 
-export interface ApiError {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    details?: any;
-    field?: string;
-    timestamp: Date;
-    requestId: string;
-    traceId?: string;
-  };
-}
-
-// ValidationError is defined in core.types.ts - using that definition
-
-export interface ApiValidationError {
-  success: false;
-  error: {
-    code: 'VALIDATION_ERROR';
-    message: string;
-    validationErrors: ValidationError[];
-    timestamp: Date;
-    requestId: string;
-  };
-}
-
-// PaginatedResponse is defined in core.types.ts - using that definition
-
-// This will be replaced with the core types version
-
-// HTTP status code types
+// HTTP status code types - commonly used for API responses
 export type HttpStatus = 
   | 200 // OK
   | 201 // Created
@@ -48,44 +18,33 @@ export type HttpStatus =
   | 404 // Not Found
   | 409 // Conflict
   | 422 // Unprocessable Entity
-  | 429 // Too Many Requests
   | 500 // Internal Server Error
   | 503; // Service Unavailable
 
-// LoadingState is defined in core.types.ts - using that definition
-
+// Extends LoadingState from core.types.ts with data property
 export interface AsyncOperation<T> extends LoadingState {
   data?: T;
 }
 
-// API configuration
-export interface ApiConfig {
-  baseUrl: string;
-  timeout: number;
-  retries: number;
-  retryDelay: number;
-  headers?: { [key: string]: string };
-}
-
-// Webhook/real-time event interfaces
+// Real-time event interfaces for WebSocket communication
 export interface WebSocketMessage<T = any> {
   type: string;
   payload: T;
-  timestamp: Date;
-  id: string;
+  timestamp: Timestamp;
+  id: UUID;
 }
 
 export interface TicketUpdateEvent {
-  ticketId: string;
+  ticketId: UUID;
   eventType: 'updated' | 'commented' | 'status_changed' | 'assigned';
   data: any;
   actor: {
-    id: string;
+    id: UUID;
     name: string;
   };
 }
 
-// File upload interfaces
+// File upload interfaces for attachment handling
 export interface FileUploadProgress {
   loaded: number;
   total: number;
@@ -95,10 +54,11 @@ export interface FileUploadProgress {
 }
 
 export interface FileUploadResponse {
-  fileId: string;
+  fileId: UUID;
   url: string;
   thumbnailUrl?: string;
   fileName: string;
   fileSize: number;
   mimeType: string;
+  uploadedAt: Timestamp;
 }

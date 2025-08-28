@@ -1,371 +1,133 @@
 /**
- * Form Schema Interfaces
- * Defines the structure for dynamic form rendering with improved type safety
+ * Form Schema Interfaces - Optimized
+ * Defines only the necessary structure for dynamic form rendering
  */
 
-import { BaseEntity, UUID, Timestamp, JsonValue, ValidationError, Result } from './core.types';
+import { JsonValue } from './core.types';
 
-// Enhanced field types with better categorization
-export type InputFieldType = 'text' | 'email' | 'password' | 'url' | 'tel';
-export type NumberFieldType = 'number' | 'range' | 'currency';
-export type DateFieldType = 'date' | 'datetime' | 'time' | 'month' | 'week';
-export type ChoiceFieldType = 'select' | 'radio' | 'checkbox' | 'multiselect';
-export type TextFieldType = 'textarea' | 'richtext' | 'markdown';
-export type FileFieldType = 'file' | 'image' | 'document';
-export type LayoutFieldType = 'group' | 'section' | 'divider' | 'spacer';
-export type AdvancedFieldType = 'signature' | 'location' | 'rating' | 'color';
-
+// Core field types actually used in the application
 export type FieldType = 
-  | InputFieldType 
-  | NumberFieldType 
-  | DateFieldType 
-  | ChoiceFieldType 
-  | TextFieldType 
-  | FileFieldType 
-  | LayoutFieldType 
-  | AdvancedFieldType;
+  | 'text' 
+  | 'email' 
+  | 'number' 
+  | 'date' 
+  | 'select' 
+  | 'radio' 
+  | 'checkbox' 
+  | 'textarea';
 
-// Enhanced validator types
-export type BasicValidatorType = 'required' | 'email' | 'url';
-export type LengthValidatorType = 'minlength' | 'maxlength' | 'length';
-export type NumericValidatorType = 'min' | 'max' | 'range';
-export type PatternValidatorType = 'pattern' | 'format';
-export type CustomValidatorType = 'custom' | 'async';
-
+// Basic validator types actually used
 export type ValidatorType = 
-  | BasicValidatorType 
-  | LengthValidatorType 
-  | NumericValidatorType 
-  | PatternValidatorType 
-  | CustomValidatorType;
+  | 'required' 
+  | 'email' 
+  | 'min' 
+  | 'max' 
+  | 'minlength' 
+  | 'maxlength';
 
-// Enhanced conditional operators
-export type ComparisonOperator = 'equals' | 'notEquals' | 'greaterThan' | 'lessThan' | 'greaterThanOrEqual' | 'lessThanOrEqual';
-export type StringOperator = 'contains' | 'notContains' | 'startsWith' | 'endsWith' | 'regex';
-export type ArrayOperator = 'includes' | 'excludes' | 'intersects';
-export type ExistenceOperator = 'isEmpty' | 'isNotEmpty' | 'isNull' | 'isNotNull';
-export type LogicalOperator = 'and' | 'or' | 'not';
-
-export type ConditionalOperator = 
-  | ComparisonOperator 
-  | StringOperator 
-  | ArrayOperator 
-  | ExistenceOperator 
-  | LogicalOperator;
-
-// Enhanced validator interface with better type safety
+// Simple validator interface
 export interface FieldValidator {
   name: ValidatorType;
-  args?: ValidationArgs;
   message?: string;
-  severity?: 'error' | 'warning' | 'info';
-  async?: boolean;
-  customFunction?: string; // Reference to custom validator function
+  args?: number | string; // Simplified args type
 }
 
-type ValidationArgs = 
-  | string 
-  | number 
-  | RegExp 
-  | { min?: number; max?: number } 
-  | { [key: string]: JsonValue };
-
-// Enhanced conditional rule with complex logic support
-export interface ConditionalRule {
-  fieldId: string;
-  operator: ConditionalOperator;
-  value: JsonValue;
-  logicalOperator?: 'and' | 'or'; // For combining with next rule
-  negate?: boolean; // Invert the result
-  caseSensitive?: boolean; // For string operations
-}
-
-// Enhanced field options with grouping and dynamic loading
+// Field option interface
 export interface FieldOption {
   value: JsonValue;
   label: string;
   disabled?: boolean;
-  description?: string;
-  icon?: string;
-  group?: string;
-  metadata?: JsonValue;
 }
 
+// Field option group interface (for grouped selects)
 export interface FieldOptionGroup {
   label: string;
   options: FieldOption[];
-  disabled?: boolean;
-  collapsible?: boolean;
 }
 
-export interface DynamicOptionsConfig {
-  url?: string;
-  method?: 'GET' | 'POST';
-  dependsOn?: string[]; // Field IDs that trigger reload
-  params?: { [key: string]: string };
-  transform?: string; // Function name to transform response
-  cache?: boolean;
-  cacheTimeout?: number;
-}
-
-export interface FieldAttributes {
-  placeholder?: string;
-  hint?: string;
-  prefix?: string;
-  suffix?: string;
-  min?: number;
-  max?: number;
-  step?: number;
-  rows?: number;
-  cols?: number;
-  multiple?: boolean;
-  searchable?: boolean;
-  clearable?: boolean;
-  accept?: string; // For file inputs
-  maxFileSize?: number; // In bytes
-  allowedFileTypes?: string[];
-  [key: string]: any;
-}
-
-// Enhanced form field interface with better type safety and features
+// Core form field interface with only necessary properties
 export interface FormField {
-  id: UUID;
-  name: string; // HTML name attribute
+  id: string;
   label: string;
   type: FieldType;
-  required?: boolean;
-  placeholder?: string;
-  description?: string;
-  helpText?: string;
   default?: JsonValue;
-  validators?: FieldValidator[];
-  options?: FieldOption[] | FieldOptionGroup[];
-  dynamicOptions?: DynamicOptionsConfig;
-  visibleWhen?: ConditionalRule[];
-  enabledWhen?: ConditionalRule[];
+  placeholder?: string;
   readOnly?: boolean;
   disabled?: boolean;
-  hidden?: boolean;
-  attributes?: FieldAttributes;
-  children?: FormField[]; // For group/nested fields
-  order?: number;
-  width?: number | string; // CSS width
-  cssClass?: string[];
-  styles?: { [key: string]: string };
-  tooltip?: string;
-  icon?: string;
-  prefix?: string;
-  suffix?: string;
-  maxLength?: number;
-  tabIndex?: number;
-  ariaLabel?: string;
-  dataAttributes?: { [key: string]: string };
-  customProperties?: JsonValue;
+  validators?: FieldValidator[];
+  options?: FieldOption[];
+  attributes?: { [key: string]: any }; // For additional HTML attributes like rows, etc.
+  visibleWhen?: ConditionalRule[]; // For conditional visibility
 }
 
-// Enhanced form section with layout and behavior options
-export interface FormSection extends BaseEntity {
-  name: string;
+// Core form section interface
+export interface FormSection {
+  id: string;
   title: string;
-  description?: string;
-  icon?: string;
   collapsible?: boolean;
   collapsed?: boolean;
   repeatable?: boolean;
-  maxRepeats?: number;
   minRepeats?: number;
-  addButtonText?: string;
-  removeButtonText?: string;
+  maxRepeats?: number;
   fields: FormField[];
-  layout?: {
-    type: 'default' | 'grid' | 'flex' | 'tabs' | 'accordion';
-    columns?: number;
-    spacing?: 'tight' | 'normal' | 'loose';
-    alignment?: 'left' | 'center' | 'right';
-  };
-  visibleWhen?: ConditionalRule[];
-  enabledWhen?: ConditionalRule[];
-  order?: number;
-  cssClass?: string[];
-  styles?: { [key: string]: string };
-  validation?: {
-    validateOnAdd?: boolean;
-    validateOnRemove?: boolean;
-    customValidation?: string;
-  };
+  visibleWhen?: ConditionalRule[]; // For conditional section visibility
 }
 
-// Enhanced form schema with versioning and metadata
-export interface FormSchema extends BaseEntity {
-  name: string;
+// Core form schema interface
+export interface FormSchema {
+  id: string;
   title: string;
   description?: string;
-  category?: string;
-  tags?: string[];
-  schemaVersion: string; // Renamed to avoid conflict with BaseEntity.version
-  status: 'draft' | 'published' | 'archived';
   sections: FormSection[];
-  configuration?: DynamicFormConfig;
-  permissions?: {
-    view?: string[];
-    edit?: string[];
-    submit?: string[];
-    admin?: string[];
-  };
-  localization?: {
-    [locale: string]: {
-      title?: string;
-      description?: string;
-      sections?: { [sectionId: string]: Partial<FormSection> };
-      fields?: { [fieldId: string]: Partial<FormField> };
-    };
-  };
-  customValidation?: string; // Reference to custom validation function
-  onSubmit?: {
-    url?: string;
-    method?: 'POST' | 'PUT';
-    transform?: string;
-    successMessage?: string;
-    errorMessage?: string;
-  };
-  hooks?: {
-    beforeRender?: string;
-    afterRender?: string;
-    beforeSubmit?: string;
-    afterSubmit?: string;
-    onFieldChange?: string;
-    onSectionChange?: string;
-  };
 }
 
-// Enhanced validation error with context
-export interface FormValidationError extends ValidationError {
-  fieldId: UUID;
-  sectionId: UUID;
-  sectionIndex?: number; // For repeatable sections
-  fieldPath: string; // Full path to field (e.g., 'section1.field2')
-  severity: 'error' | 'warning' | 'info';
-  timestamp: Timestamp;
-  context?: JsonValue;
-}
-
-// Type-safe form submission data
+// Form submission data type
 export interface FormSubmissionData {
-  [sectionId: string]: SectionData | SectionData[];
+  [sectionId: string]: SectionData;
 }
 
 export interface SectionData {
   [fieldId: string]: JsonValue;
 }
 
-// Enhanced form configuration with performance and UX options
+// Simplified form configuration - only includes actually used properties
 export interface DynamicFormConfig {
-  // Validation settings
   validation?: {
-    mode: 'onChange' | 'onBlur' | 'onSubmit' | 'manual';
-    debounceTime: number;
-    showInlineErrors: boolean;
-    showSummary: boolean;
-    scrollToFirstError: boolean;
-    highlightInvalidFields: boolean;
+    mode?: 'onChange' | 'onBlur' | 'onSubmit';
+    debounceTime?: number;
   };
   
-  // Auto-save settings
-  autoSave?: {
-    enabled: boolean;
-    interval: number; // milliseconds
-    showIndicator: boolean;
-    onlyIfValid: boolean;
-  };
-  
-  // Conditional logic settings
   conditionalLogic?: {
-    enabled: boolean;
-    animateTransitions: boolean;
-    evaluationMode: 'lazy' | 'eager';
-    debugMode: boolean;
-  };
-  
-  // UI/UX settings
-  ui?: {
-    theme: 'light' | 'dark' | 'auto';
-    density: 'compact' | 'comfortable' | 'spacious';
-    showProgress: boolean;
-    showFieldNumbers: boolean;
-    showRequiredIndicator: boolean;
-    focusFirstField: boolean;
-  };
-  
-  // Performance settings
-  performance?: {
-    virtualScrolling: boolean;
-    lazyLoadSections: boolean;
-    enableMemoization: boolean;
-    batchUpdates: boolean;
-  };
-  
-  // Accessibility settings
-  accessibility?: {
-    announceChanges: boolean;
-    keyboardNavigation: boolean;
-    highContrast: boolean;
-    fontSize: 'small' | 'medium' | 'large';
-  };
-  
-  // Localization
-  localization?: {
-    locale: string;
-    dateFormat: string;
-    numberFormat: string;
-    currency: string;
-    timezone: string;
+    enabled?: boolean;
   };
 }
 
-// Form state management interfaces
-export interface FormState {
-  isValid: boolean;
-  isDirty: boolean;
-  isTouched: boolean;
-  isSubmitting: boolean;
-  isLoading: boolean;
-  errors: FormValidationError[];
-  warnings: FormValidationError[];
-  lastSaved?: Timestamp;
-  currentStep?: number;
-  totalSteps?: number;
+// Form validation error interface
+export interface FormValidationError {
+  fieldId: string;
+  sectionId: string;
+  fieldPath: string;
+  message: string;
+  code: string;
+  severity: 'error' | 'warning' | 'info';
+  timestamp: Date;
 }
 
-// Form event interfaces
-export interface FormEvent<T = any> {
-  type: FormEventType;
-  formId: UUID;
-  timestamp: Timestamp;
-  data: T;
-  source: 'user' | 'system' | 'validation';
+// Conditional rule interface for future use
+export interface ConditionalRule {
+  fieldId: string;
+  operator: ConditionalOperator;
+  value: JsonValue;
 }
 
-export type FormEventType = 
-  | 'field-change'
-  | 'field-focus' 
-  | 'field-blur'
-  | 'section-add'
-  | 'section-remove'
-  | 'form-submit'
-  | 'form-reset'
-  | 'form-save'
-  | 'validation-error'
-  | 'conditional-change';
+// Conditional operator type
+export type ConditionalOperator = 
+  | 'equals' 
+  | 'notEquals' 
+  | 'contains' 
+  | 'notContains' 
+  | 'greaterThan' 
+  | 'lessThan' 
+  | 'isEmpty' 
+  | 'isNotEmpty';
 
-// Form builder interfaces for creating forms dynamically
-export interface FormBuilder {
-  addSection(section: Omit<FormSection, 'id' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy' | 'version'>): FormBuilder;
-  addField(sectionId: UUID, field: Omit<FormField, 'id'>): FormBuilder;
-  removeSection(sectionId: UUID): FormBuilder;
-  removeField(sectionId: UUID, fieldId: UUID): FormBuilder;
-  updateSection(sectionId: UUID, updates: Partial<FormSection>): FormBuilder;
-  updateField(sectionId: UUID, fieldId: UUID, updates: Partial<FormField>): FormBuilder;
-  build(): FormSchema;
-  validate(): Result<FormSchema, ValidationError[]>;
-  clone(): FormBuilder;
-}

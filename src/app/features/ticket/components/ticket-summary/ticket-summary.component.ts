@@ -1,293 +1,158 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, OnInit, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatListModule } from '@angular/material/list';
+import { Observable } from 'rxjs';
 
 import { Ticket } from '../../../../shared/models/ticket.interface';
+import { TicketService } from '../../../../shared/services/ticket.service';
+import { UtilsService } from '../../../../shared/services/utils.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
-    selector: 'app-ticket-summary',
-    imports: [
-        CommonModule,
-        MatIconModule
-    ],
-    template: `
-    <div class="ticket-summary-card" *ngIf="ticket">
-      <!-- Card Header -->
-      <div class="summary-header">
-        <h3 class="summary-title">Ticket Summary</h3>
-      </div>
-
-      <!-- Status Badges -->
-      <div class="status-badges">
-        <!-- Status Badge -->
-        <div class="status-badge" [ngClass]="'status-' + ticket.status.toLowerCase()">
-          <mat-icon>schedule</mat-icon>
-          {{ getStatusLabel(ticket.status) }}
-        </div>
-        
-        <!-- Priority Badge -->
-        <div class="priority-badge" [ngClass]="'priority-' + ticket.priority.toLowerCase()">
-          {{ getPriorityLabel(ticket.priority) }}
-        </div>
-      </div>
-
-      <!-- Summary Details -->
-      <div class="summary-details">
-        <!-- Assigned To -->
-        <div class="detail-item">
-          <div class="detail-label">Assigned To</div>
-          <div class="detail-value">
-            <div class="user-info" *ngIf="ticket.assignedTo; else unassigned">
-              <div class="user-avatar" [style.background-color]="getAvatarColor(ticket.assignedTo.name)">
-                {{ getInitials(ticket.assignedTo.name) }}
-              </div>
-              <span class="user-name">{{ ticket.assignedTo.name }}</span>
-            </div>
-            <ng-template #unassigned>
-              <span class="unassigned-text">Unassigned</span>
-            </ng-template>
-          </div>
-        </div>
-
-        <!-- Reporter -->
-        <div class="detail-item">
-          <div class="detail-label">Reporter</div>
-          <div class="detail-value">
-            <div class="user-info" *ngIf="getReporter(ticket); else noReporter">
-              <div class="user-avatar reporter-avatar">
-                {{ getInitials(getReporter(ticket)) }}
-              </div>
-              <span class="user-name">{{ getReporter(ticket) }}</span>
-            </div>
-            <ng-template #noReporter>
-              <span class="unassigned-text">Not specified</span>
-            </ng-template>
-          </div>
-        </div>
-
-        <!-- Ticket ID -->
-        <div class="detail-item">
-          <div class="detail-label">Ticket ID</div>
-          <div class="detail-value ticket-id">
-            #{{ ticket.id }}
-          </div>
-        </div>
-
-        <!-- Client -->
-        <div class="detail-item">
-          <div class="detail-label">Client</div>
-          <div class="detail-value">
-            {{ getClientName(ticket) }}
-          </div>
-        </div>
-
-        <!-- Type -->
-        <div class="detail-item">
-          <div class="detail-label">Type</div>
-          <div class="detail-value">
-            {{ getProcessName(ticket.type) }}
-          </div>
-        </div>
-
-        <!-- Sub-Category -->
-        <div class="detail-item">
-          <div class="detail-label">Sub-Category</div>
-          <div class="detail-value">
-            {{ getSubCategory(ticket) }}
-          </div>
-        </div>
-
-        <!-- Age -->
-        <div class="detail-item">
-          <div class="detail-label">Age</div>
-          <div class="detail-value age-value">
-            <div class="age-info">
-              <mat-icon class="age-icon">schedule</mat-icon>
-              <span class="age-duration">{{ getTicketAge(ticket) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-    styleUrl: './ticket-summary.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-ticket-summary',
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatCardModule,
+    MatChipsModule,
+    MatListModule
+  ],
+  templateUrl: './ticket-summary.component.html',
+  styleUrl: './ticket-summary.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TicketSummaryComponent {
+export class TicketSummaryComponent implements OnInit {
   @Input() ticket?: Ticket;
+  @Input() ticketId?: string;
 
-  private readonly DEFAULT_CLIENT = 'Acme Corp';
-  private readonly DEFAULT_REPORTER = 'Sarah Johnson';
-  private readonly AVATAR_COLORS = [
-    '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-    '#06b6d4', '#f97316', '#84cc16', '#6366f1'
-  ];
+  // Inject services using modern Angular patterns
+  private readonly ticketService = inject(TicketService);
+  public readonly utilsService = inject(UtilsService);
+  private readonly route = inject(ActivatedRoute);
 
-  private readonly PRIORITY_LABELS: Record<string, string> = {
-    'critical': 'Critical',
-    'high': 'High',
-    'medium': 'Medium',
-    'low': 'Low'
-  };
+  // Signal for reactive ticket data
+  ticketSignal = signal<Ticket | undefined>(undefined);
 
-  private readonly STATUS_LABELS: Record<string, string> = {
-    'open': 'Open',
-    'in_progress': 'In Progress',
-    'pending': 'Pending',
-    'resolved': 'Resolved',
-    'closed': 'Closed'
-  };
+  // Computed properties for reactive display data
+  priorityLabel = computed(() => {
+    const ticket = this.ticketSignal();
+    return ticket ? this.utilsService.getPriorityLabel(ticket.priority) : '';
+  });
 
-  private readonly TYPE_LABELS: Record<string, string> = {
-    'support_request': 'Support Request',
-    'employee_onboarding': 'Onboarding',
-    'bug_report': 'Bug Report',
-    'feature_request': 'Feature Request'
-  };
+  statusLabel = computed(() => {
+    const ticket = this.ticketSignal();
+    return ticket ? this.utilsService.getStatusLabel(ticket.status) : '';
+  });
 
-  /**
-   * Get priority label
-   */
-  getPriorityLabel(priority: string): string {
-    return this.PRIORITY_LABELS[priority] || 'Unknown';
-  }
+  processName = computed(() => {
+    const ticket = this.ticketSignal();
+    return ticket ? this.utilsService.getProcessName(ticket.type) : '';
+  });
 
-  /**
-   * Get status label
-   */
-  getStatusLabel(status: string): string {
-    return this.STATUS_LABELS[status.toLowerCase()] || 'In Progress';
-  }
-
-  /**
-   * Get process name from ticket type
-   */
-  getProcessName(type: any): string {
-    // Handle both string and TicketType object
-    const typeKey = typeof type === 'string' ? type : type?.name || 'unknown';
-    return this.TYPE_LABELS[typeKey] || 'General';
-  }
-
-  /**
-   * Get user initials for avatar
-   */
-  getInitials(name: string): string {
-    if (!name?.trim()) return '?';
+  clientName = computed(() => {
+    const ticket = this.ticketSignal();
+    if (!ticket) return '';
     
-    const words = name.trim().split(' ').filter(word => word.length > 0);
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    }
-    return words[0]?.[0]?.toUpperCase() || '?';
-  }
-
-  /**
-   * Get avatar color based on name
-   */
-  getAvatarColor(name: string): string {
-    if (!name?.trim()) return this.AVATAR_COLORS[0];
-    
-    const charCode = name.charCodeAt(0) + name.charCodeAt(name.length - 1);
-    return this.AVATAR_COLORS[charCode % this.AVATAR_COLORS.length];
-  }
-
-  /**
-   * Get client name from ticket
-   */
-  getClientName(ticket: Ticket): string {
-    const formData = ticket.formData;
-    
-    if (formData) {
-      // Check general_info section
-      const generalInfo = formData['general_info'];
-      if (this.isValidObject(generalInfo)) {
-        const clientName = (generalInfo as Record<string, any>)['customer_name'];
-        if (clientName) return clientName;
-      }
-      
-      // Check basic_information section
-      const basicInfo = formData['basic_information'];
-      if (this.isValidObject(basicInfo)) {
-        const clientName = (basicInfo as Record<string, any>)['client'];
-        if (clientName) return clientName;
-      }
-    }
-    
-    // Check custom fields if they exist
+    // Use the direct client property from customFields
     if (ticket.customFields?.['client']) {
       return String(ticket.customFields['client']);
     }
     
-    return this.DEFAULT_CLIENT;
-  }
+    return 'N/A';
+  });
 
-  /**
-   * Get reporter name
-   */
-  getReporter(ticket: Ticket): string {
-    const formData = ticket.formData;
+  reporterName = computed(() => {
+    const ticket = this.ticketSignal();
+    if (!ticket) return '';
     
-    if (formData) {
-      // Check employee_details section
-      const employeeDetails = formData['employee_details'];
-      if (this.isValidObject(employeeDetails)) {
-        const fullName = (employeeDetails as Record<string, any>)['full_name'];
-        if (fullName) return fullName;
-      }
-      
-      // Check basic_information section
-      const basicInfo = formData['basic_information'];
-      if (this.isValidObject(basicInfo)) {
-        const reporterName = (basicInfo as Record<string, any>)['reporter'];
-        if (reporterName) return reporterName;
-      }
+    // Use the direct reporter property from the ticket
+    if (ticket.reporter?.name && ticket.reporter.name.trim()) {
+      return ticket.reporter.name;
     }
     
-    return this.DEFAULT_REPORTER;
-  }
-
-  /**
-   * Get sub-category
-   */
-  getSubCategory(ticket: Ticket): string {
-    const formData = ticket.formData;
-    
-    if (formData) {
-      const basicInfo = formData['basic_information'];
-      if (this.isValidObject(basicInfo)) {
-        const subCategory = (basicInfo as Record<string, any>)['sub_category'];
-        if (subCategory) return subCategory;
-      }
+    // Fallback to display name if name is not available
+    if (ticket.reporter?.displayName && ticket.reporter.displayName.trim()) {
+      return ticket.reporter.displayName;
     }
     
-    // Default based on ticket type
+    // Final fallback to default reporter
+    return 'N/A';
+  });
+
+  subCategory = computed(() => {
+    const ticket = this.ticketSignal();
+    if (!ticket) return '';
+    
+    // Use the direct subcategory property from the ticket
+    if (ticket.subcategory && ticket.subcategory.trim()) {
+      return ticket.subcategory;
+    }
+    
+    // Fallback: Default based on ticket type if no subcategory is set
     const typeKey = typeof ticket.type === 'string' ? ticket.type : ticket.type?.name || 'unknown';
     return typeKey === 'employee_onboarding' ? 'New Hire' : 'General';
+  });
+
+  ticketAge = computed(() => {
+    const ticket = this.ticketSignal();
+    return ticket ? this.utilsService.getTicketAge(ticket) : '';
+  });
+
+  // Computed properties for UI styling
+  statusIcon = computed(() => {
+    const ticket = this.ticketSignal();
+    return ticket ? this.utilsService.getStatusIcon(ticket.status) : 'help';
+  });
+
+  statusColorClass = computed(() => {
+    const ticket = this.ticketSignal();
+    return ticket ? this.utilsService.getStatusColorClass(ticket.status) : '';
+  });
+
+  priorityColorClass = computed(() => {
+    const ticket = this.ticketSignal();
+    return ticket ? this.utilsService.getPriorityColorClass(ticket.priority) : '';
+  });
+
+  constructor() {
+    // Effect to update ticket signal when Input changes
+    effect(() => {
+      if (this.ticket) {
+        this.ticketSignal.set(this.ticket);
+      }
+    });
   }
 
-  /**
-   * Get ticket age
-   */
-  getTicketAge(ticket: Ticket): string {
-    const createdDate = new Date(ticket.createdAt);
-    const now = new Date();
-    const diffMs = now.getTime() - createdDate.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-    
-    if (diffDays > 0) {
-      const remainingHours = diffHours % 24;
-      return `${diffDays}d ${remainingHours}h`;
-    } else {
-      const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      return `${diffHours}h ${diffMinutes}m`;
+  ngOnInit(): void {
+    // Load ticket data if ticketId is provided but no ticket object
+    if (this.ticketId && !this.ticket) {
+      this.loadTicketData(this.ticketId);
+    } else if (!this.ticket && !this.ticketId) {
+      // Try to get ticketId from route parameters
+      const routeTicketId = this.route.snapshot.paramMap.get('id');
+      if (routeTicketId) {
+        this.loadTicketData(routeTicketId);
+      }
     }
   }
 
   /**
-   * Check if value is a valid object (not null, not array)
+   * Load ticket data using TicketService
    */
-  private isValidObject(value: unknown): value is Record<string, unknown> {
-    return value !== null && typeof value === 'object' && !Array.isArray(value);
+  private loadTicketData(ticketId: string): void {
+    this.ticketService.getTicketById(ticketId).subscribe({
+      next: (ticket: Ticket) => {
+        this.ticket = ticket;
+        this.ticketSignal.set(ticket);
+      },
+      error: (error: any) => {
+        console.error('Error loading ticket:', error);
+      }
+    });
   }
+
+
 }

@@ -21,21 +21,25 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, Observable } from 'rxjs';
 
 import { FormSectionComponent } from '../../components/form-section/form-section.component';
 import { TicketSummaryComponent } from '../../components/ticket-summary/ticket-summary.component';
+import { TicketHeaderComponent } from '../../components/ticket-header/ticket-header.component';
+import { TicketDetailSkeletonComponent } from '../../../../shared/components/skeleton/ticket-detail-skeleton.component';
 
 import { DynamicFormService } from '../../../../shared/services/dynamic-form.service';
 import { HistoryService } from '../../../../shared/services/history.service';
-import { MockDataService } from '../../../../shared/services/mock-data.service';
+import { CommentService } from '../../../../shared/services/comment.service';
+import { TicketService } from '../../../../shared/services/ticket.service';
 import { 
   FormSchema, 
   Ticket, 
   TicketStatus, 
   FormSubmissionData, 
   AsyncOperation,
-  Comment
+  Comment,
+  CreateCommentRequest
 } from '../../../../shared/models';
 import { HistoryItem } from '../../../../shared/models/history.interface';
 
@@ -65,7 +69,9 @@ import { HistoryItem } from '../../../../shared/models/history.interface';
         MatMenuModule,
         MatDialogModule,
         FormSectionComponent,
-        TicketSummaryComponent
+        TicketSummaryComponent,
+        TicketHeaderComponent,
+        TicketDetailSkeletonComponent
     ],
     templateUrl: './ticket-detail.component.html',
     styleUrls: ['./ticket-detail.component.scss'],
@@ -75,7 +81,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private dynamicFormService = inject(DynamicFormService);
   private historyService = inject(HistoryService);
-  private mockDataService = inject(MockDataService); // TODO: Replace with actual API services
+  private ticketService = inject(TicketService);
+  private commentService = inject(CommentService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
@@ -123,20 +130,40 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   // Draft saving state
   isDraftSaving = false;
   
-  // Comments state - now loaded from MockDataService
-  // TODO: Replace with actual CommentService
+  // Comments state - now managed by CommentService
   newComment = '';
-  mockComments: Comment[] = [];
+  comments$?: Observable<Comment[]>;
+  commentsCount$?: Observable<number>;
   
-  // History state
-  historyItems = this.historyService.getHistorySignal();
+  // History state - now managed by HistoryService
+  historyItems$?: Observable<HistoryItem[]>;
+  historyCount$?: Observable<number>;
   
-  // Computed property for history count
+  // Computed property for history count (fallback)
   get historyCount(): number {
-    return this.historyItems().length;
+    return 0; // Will be replaced by historyCount$ observable
+  }
+
+  // Loading state computed properties
+  get isMainDataLoaded(): boolean {
+    return !this.ticketOperation.isLoading && !this.schemaOperation.isLoading && !!this.dynamicForm;
+  }
+
+  get isAnyDataLoading(): boolean {
+    return this.ticketOperation.isLoading || this.schemaOperation.isLoading;
+  }
+
+  get hasLoadingErrors(): boolean {
+    return !!this.ticketOperation.error || !!this.schemaOperation.error;
   }
   
   ngOnInit(): void {
+    console.log('🚀 TicketDetailComponent ngOnInit - initializing...');
+    console.log('Initial loading states:', {
+      ticketLoading: this.ticketOperation.isLoading,
+      schemaLoading: this.schemaOperation.isLoading,
+      isAnyDataLoading: this.isAnyDataLoading
+    });
     this.initializeComponent();
     this.setupResponsiveHandling();
     this.setupStickyBehavior();
@@ -160,31 +187,50 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Initialize comment observables with ticket ID
+    this.comments$ = this.commentService.getComments(this.ticketId);
+    this.commentsCount$ = this.commentService.getCommentsCount(this.ticketId);
+    
+    // Initialize history observables with ticket ID
+    this.historyItems$ = this.historyService.getHistoryForTicket(this.ticketId);
+    this.historyCount$ = this.historyService.getHistoryCount(this.ticketId);
+    
     // Load ticket and form schema
     this.loadTicketData();
   }
 
   /**
-   * Load ticket data and form schema using centralized MockDataService
-   * TODO: Replace MockDataService calls with actual API service calls
+   * Load ticket data and form schema using TicketService
    */
   async loadTicketData(): Promise<void> {
     try {
-      // Load ticket data using MockDataService
-      // TODO: Replace with actual TicketService.getTicketById(ticketId)
-      this.mockDataService.getTicketById(this.ticketId).subscribe({
+      console.log('🎯 Starting data load, setting loading states...');
+      
+      // Ensure loading states are set initially
+      this.ticketOperation = { isLoading: true };
+      this.schemaOperation = { isLoading: true };
+      this.cdr.detectChanges(); // Force change detection to show skeletons
+      
+      // Load ticket data using TicketService
+      this.ticketService.getTicketById(this.ticketId).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: (ticket) => {
-          this.ticket = ticket;
-          this.ticketOperation = { isLoading: false, data: ticket };
-          
-          // Populate form with existing data after ticket is loaded
-          if (this.dynamicForm && ticket.formData) {
-            this.dynamicFormService.populateForm(this.dynamicForm, ticket.formData);
+          if (ticket) { // Only process when we have actual data
+            console.log('✅ Ticket data loaded:', ticket);
+            this.ticket = ticket;
+            this.ticketOperation = { isLoading: false, data: ticket };
+            
+            // Populate form with existing data after ticket is loaded
+            if (this.dynamicForm && ticket.formData) {
+              this.dynamicFormService.populateForm(this.dynamicForm, ticket.formData);
+            }
+            
+            this.cdr.detectChanges();
           }
-          
-          this.cdr.detectChanges();
         },
         error: (error) => {
+          console.error('❌ Ticket loading error:', error);
           this.ticketOperation = { 
             isLoading: false, 
             error: {
@@ -200,24 +246,29 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
         }
       });
       
-      // Load form schema using MockDataService
-      // TODO: Replace with actual FormSchemaService.getFormSchema(schemaId)
-      this.mockDataService.getFormSchema('schema_001').subscribe({
+      // Load form schema using TicketService
+      this.ticketService.getFormSchema('schema_001').pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: (schema) => {
-          this.formSchema = schema;
-          this.schemaOperation = { isLoading: false, data: schema };
-          
-          // Create dynamic form after schema is loaded
-          this.createDynamicForm();
-          
-          // Setup auto-save if enabled
-          if (this.autoSaveEnabled) {
-            this.setupAutoSave();
+          if (schema) { // Only process when we have actual data
+            console.log('✅ Schema data loaded:', schema);
+            this.formSchema = schema;
+            this.schemaOperation = { isLoading: false, data: schema };
+            
+            // Create dynamic form after schema is loaded
+            this.createDynamicForm();
+            
+            // Setup auto-save if enabled
+            if (this.autoSaveEnabled) {
+              this.setupAutoSave();
+            }
+            
+            this.cdr.detectChanges();
           }
-          
-          this.cdr.detectChanges();
         },
         error: (error) => {
+          console.error('❌ Schema loading error:', error);
           this.schemaOperation = { 
             isLoading: false, 
             error: {
@@ -233,17 +284,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
         }
       });
       
-      // Load comments using MockDataService
-      // TODO: Replace with actual CommentService.getTicketComments(ticketId)
-      this.mockDataService.getTicketComments(this.ticketId).subscribe({
-        next: (comments) => {
-          this.mockComments = comments;
-          this.cdr.detectChanges();
-        },
-        error: (error) => {
-          console.error('Failed to load comments:', error);
-        }
-      });
+      // Comments are now automatically loaded by CommentService
+      // History is automatically loaded by HistoryService via the historyItems signal
       
     } catch (error) {
       this.handleError('Failed to initialize data loading', error);
@@ -259,25 +301,12 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
     this.dynamicForm = this.dynamicFormService.createFormFromSchema(
       this.formSchema,
       {
-        autoSave: {
-          enabled: this.autoSaveEnabled,
-          interval: this.autoSaveInterval,
-          showIndicator: true,
-          onlyIfValid: false
-        },
-        conditionalLogic: {
-          enabled: true,
-          animateTransitions: false,
-          evaluationMode: 'lazy',
-          debugMode: false
-        },
         validation: {
           mode: 'onChange',
-          debounceTime: 300,
-          showInlineErrors: true,
-          showSummary: true,
-          scrollToFirstError: true,
-          highlightInvalidFields: true
+          debounceTime: 300
+        },
+        conditionalLogic: {
+          enabled: true
         }
       }
     );
@@ -336,8 +365,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle form submission using MockDataService
-   * TODO: Replace with actual TicketService.saveTicket(ticketId, formData)
+   * Handle form submission using TicketService
    */
   async onSubmit(): Promise<void> {
     if (!this.dynamicForm || !this.formSchema) return;
@@ -353,8 +381,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       
       const formData = this.dynamicFormService.convertToSubmissionData(this.dynamicForm);
       
-      // Use MockDataService to save ticket
-      this.mockDataService.saveTicket(this.ticketId, formData).subscribe({
+      // Use TicketService to save ticket
+      this.ticketService.saveTicket(this.ticketId, formData).subscribe({
         next: (updatedTicket) => {
           this.ticket = updatedTicket;
           this.saveOperation = { isLoading: false, data: updatedTicket };
@@ -394,8 +422,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Save as draft using MockDataService
-   * TODO: Replace with actual TicketService.saveDraft(ticketId, formData)
+   * Save as draft using TicketService
    */
   async saveDraft(): Promise<void> {
     if (!this.dynamicForm) return;
@@ -406,8 +433,8 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       
       const formData = this.dynamicFormService.convertToSubmissionData(this.dynamicForm);
       
-      // Use MockDataService to save draft
-      this.mockDataService.saveDraft(this.ticketId, formData).subscribe({
+      // Use TicketService to save draft
+      this.ticketService.saveDraft(this.ticketId, formData).subscribe({
         next: () => {
           this.isDraftSaving = false;
           this.dynamicForm!.markAsPristine();
@@ -554,19 +581,21 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
 
 
   /**
-   * Add a new comment using MockDataService
-   * TODO: Replace with actual CommentService.addComment(ticketId, commentText, isInternal)
+   * Add a new comment using CommentService
    */
   addComment(): void {
     if (!this.newComment?.trim()) return;
 
     const commentText = this.newComment.trim();
+    const request: CreateCommentRequest = {
+      ticketId: this.ticketId,
+      text: commentText,
+      isInternal: false
+    };
     
-    // Use MockDataService to add comment
-    this.mockDataService.addComment(this.ticketId, commentText, false).subscribe({
+    // Use CommentService to add comment
+    this.commentService.addComment(request).subscribe({
       next: (newComment) => {
-        this.mockComments.unshift(newComment);
-        
         // Add history entry for the comment
         this.addHistoryItem('Comment Added', newComment.author, `Comment: "${commentText}"`);    
         
@@ -576,7 +605,7 @@ export class TicketDetailComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Failed to add comment:', error);
-        this.showError('Failed to add comment');
+        this.showError(error.message || 'Failed to add comment');
       }
     });
   }

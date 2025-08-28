@@ -178,22 +178,8 @@ export class FormSectionComponent implements OnInit, OnDestroy {
 
     let options: FieldOption[] = [];
 
-    // Check if it's an array of FieldOptionGroup
-    if (Array.isArray(field.options) && field.options.length > 0) {
-      const firstItem = field.options[0];
-      // Check if first item has 'options' property (indicating it's a FieldOptionGroup)
-      if ('options' in firstItem && Array.isArray(firstItem.options)) {
-        // Flatten all options from groups
-        options = (field.options as FieldOptionGroup[]).reduce((acc: FieldOption[], group) => {
-          return acc.concat(group.options);
-        }, []);
-      } else {
-        // It's already a FieldOption[]
-        options = field.options as FieldOption[];
-      }
-    } else {
-      options = field.options as FieldOption[];
-    }
+    // Since we simplified the interface, field.options is always FieldOption[]
+    options = Array.isArray(field.options) ? field.options : [];
 
     // Cache the result
     this.fieldOptionsCache.set(cacheKey, options);

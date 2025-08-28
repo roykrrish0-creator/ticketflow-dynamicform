@@ -1,0 +1,126 @@
+@if (ticket) {
+  <mat-card class="ticket-summary-card mat-elevation-z8" appearance="outlined">
+    <!-- Card Header -->
+    <mat-card-header>
+      <mat-card-title class="ticket-summary-header">Ticket Summary</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Status & Priority Chips -->
+      <mat-chip-set aria-label="Ticket meta info" class="mb-4 mt-4">
+        <!-- Status Chip - Filled with stronger visual presence -->
+        <mat-chip 
+          [ngClass]="statusColorClass()"
+          class="status-chip">
+          <mat-icon matChipAvatar>{{ statusIcon() }}</mat-icon>
+          {{ statusLabel().toUpperCase() }}
+        </mat-chip>
+        
+        <!-- Priority Chip - Lighter appearance -->
+        <mat-chip 
+          [ngClass]="priorityColorClass()"
+          class="priority-chip" 
+          variant="outlined">
+          {{ priorityLabel() }}
+        </mat-chip>
+      </mat-chip-set>
+
+      <!-- Details List -->
+      <mat-list role="list" class="details-list">
+        <!-- Assigned To -->
+        <mat-list-item>
+          <div class="list-item-content">
+            <span class="detail-label">Assigned To</span>
+            <span class="detail-value">
+              @if (ticket.assignedTo) {
+                <div class="flex items-center gap-2">
+                  <div 
+                    class="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center text-white"
+                    [style.background-color]="utilsService.getAvatarColor(ticket.assignedTo.name)">
+                    {{ utilsService.getInitials(ticket.assignedTo.name) }}
+                  </div>
+                  <span class="font-semibold">{{ ticket.assignedTo.name }}</span>
+                </div>
+              } @else {
+                <span class="text-gray-500 italic">Unassigned</span>
+              }
+            </span>
+          </div>
+        </mat-list-item>
+
+        <!-- Reporter -->
+        <mat-list-item>
+          <div class="list-item-content">
+            <span class="detail-label">Reporter</span>
+            <span class="detail-value">
+              @if (reporterName() && reporterName() !== 'N/A') {
+                <div class="flex items-center gap-2">
+                  <div 
+                    class="w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center text-white bg-gray-500">
+                    {{ utilsService.getInitials(reporterName()) }}
+                  </div>
+                  <span class="font-semibold">{{ reporterName() }}</span>
+                </div>
+              } @else {
+                <span class="text-gray-500 italic">Not specified</span>
+              }
+            </span>
+          </div>
+        </mat-list-item>
+
+        <!-- Ticket ID -->
+        <mat-list-item>
+          <div class="list-item-content">
+            <span class="detail-label">Ticket ID</span>
+            <span class="detail-value">
+              <span class="font-mono font-bold text-blue-600">#{{ ticket.id }}</span>
+            </span>
+          </div>
+        </mat-list-item>
+
+        <!-- Client -->
+        <mat-list-item>
+          <div class="list-item-content">
+            <span class="detail-label">Client</span>
+            <span class="detail-value">
+              <span class="font-semibold">{{ clientName() }}</span>
+            </span>
+          </div>
+        </mat-list-item>
+
+        <!-- Type -->
+        <mat-list-item>
+          <div class="list-item-content">
+            <span class="detail-label">Type</span>
+            <span class="detail-value">
+              <span class="font-semibold">{{ processName() }}</span>
+            </span>
+          </div>
+        </mat-list-item>
+
+        <!-- Sub-Category -->
+        <mat-list-item>
+          <div class="list-item-content">
+            <span class="detail-label">Sub-Category</span>
+            <span class="detail-value">
+              <span class="font-semibold">{{ subCategory() }}</span>
+            </span>
+          </div>
+        </mat-list-item>
+
+        <!-- Age -->
+        <mat-list-item>
+          <div class="list-item-content">
+            <span class="detail-label">Opened </span>
+            <span class="detail-value">
+              <div class="flex items-center gap-1">
+                <mat-icon class="text-gray-500" style="font-size: 16px; width: 16px; height: 16px;">schedule</mat-icon>
+                <span class="font-semibold">{{ ticketAge() }}</span>
+              </div>
+            </span>
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+}

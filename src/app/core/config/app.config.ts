@@ -151,13 +151,6 @@ export const APP_CONSTANTS = {
       LOW: { label: 'Low', color: '#28a745', level: 2 },
       PLANNING: { label: 'Planning', color: '#6c757d', level: 1 }
     },
-    DEFAULT_SLA_HOURS: {
-      URGENT: 4,
-      HIGH: 24,
-      MEDIUM: 72,
-      LOW: 168, // 1 week
-      PLANNING: 336 // 2 weeks
-    },
     AUTO_CLOSE_DAYS: 30,
     MAX_ATTACHMENTS: 10,
     MAX_ATTACHMENT_SIZE: 25 * 1024 * 1024, // 25MB

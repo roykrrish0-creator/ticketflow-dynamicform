@@ -1,229 +1,203 @@
-// Ticket Summary Component Styles
+
+// Status chip colors using styles.scss variables with optimized text colors
+@use "@angular/material" as mat;
+
+// Minimal styling using Material Design and colors from styles.scss - 20% more compact
 .ticket-summary-card {
-  background: var(--mat-sys-background);
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  position: sticky;
+  top: 1.5rem;
   height: fit-content;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
-  position: sticky;
-  top: 1.5rem;
+  
+  // Reduce card padding by 20%
+  .mat-mdc-card-content {
+    padding: 4px !important; // Reduced from 16px (25% reduction)
+  }
+  
+  // Reduce card header padding
+  .mat-mdc-card-header {
+    padding: 12px 12px 4px 12px !important; // Reduced padding
+  }
+  
+  .mat-mdc-card-title {
+    font-size: 18px !important; // Reduced from 20px
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+  }
 
   @media (max-width: 767px) {
     position: static;
     max-height: none;
-    margin-top: 1rem;
   }
 }
 
-// Summary Header
-.summary-header {
-  padding: 20px 20px 16px 20px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
 
-  .summary-title {
-    margin: 0;
-    font: var(--mat-sys-title-large);
-    color: var(--mat-sys-on-surface);
-  }
+// Base custom chip class - more compact
+.status-chip {
+  border-radius: 9999px;
+  padding: 0 !important; // Reduced chip padding
+  line-height: 1.2 !important;
+  height: 24px !important; // Fixed height for compactness
 }
 
-// Status Badges - Using Material Design tokens
-.status-badges {
-  display: flex;
-  gap: 8px;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-
-  .status-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font: var(--mat-sys-label-small);
-    font-weight: 500;
-
-    mat-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-    }
-
-    // Use status badge classes from theme.scss
-    &.status-in_progress {
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
-    }
-
-    &.status-open {
-      background: var(--mat-sys-primary-container);
-      color: var(--mat-sys-on-primary-container);
-    }
-
-    &.status-resolved {
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
-    }
-
-    &.status-closed {
-      background: var(--mat-sys-surface-container-high);
-      color: var(--mat-sys-on-surface-variant);
-    }
-  }
-
-  .priority-badge {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font: var(--mat-sys-label-small);
-    font-weight: 500;
-
-    // Use priority badge classes from theme.scss
-    &.priority-high {
-      background: var(--mat-sys-error-container);
-      color: var(--mat-sys-on-error-container);
-    }
-
-    &.priority-medium {
-      background: var(--mat-sys-secondary-container);
-      color: var(--mat-sys-on-secondary-container);
-    }
-
-    &.priority-low {
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
-    }
-
-    &.priority-critical {
-      background: var(--mat-sys-error-container);
-      color: var(--mat-sys-on-error-container);
-    }
-  }
+// New
+.status-chip.status-new {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-new),
+    label-text-color: var(--status-new-text),
+    with-icon-icon-color: var(--status-new-text),
+     outline-color: transparent,
+  ));
 }
 
-// Summary Details
-.summary-details {
+// Assigned
+.status-chip.status-assigned {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-assigned),
+    label-text-color: var(--status-assigned-text),
+    with-icon-icon-color: var(--status-assigned-text),
+  ));
+}
+
+// In Progress
+.status-chip.status-in-progress {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-in-progress),
+    label-text-color: var(--status-in-progress-text),
+    with-icon-icon-color: var(--status-in-progress-text),
+  ));
+}
+
+// Manual Review
+.status-chip.status-manual-review {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-manual_review),
+    label-text-color: var(--status-manual_review-text),
+    with-icon-icon-color: var(--status-manual_review-text),
+  ));
+}
+
+// Completed
+.status-chip.status-completed {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-completed),
+    label-text-color: var(--status-completed-text),
+    with-icon-icon-color: var(--status-completed-text),
+  ));
+}
+
+// Failed
+.status-chip.status-failed {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-failed),
+    label-text-color: var(--status-failed-text),
+    with-icon-icon-color: var(--status-failed-text),
+  ));
+}
+
+
+// Base priority chip style - more compact
+.priority-chip {
+  border-radius: 9999px;
+  border: none; // remove outline
+  padding: 0 !important; // Reduced chip padding
+  height: 24px !important; // Fixed height for compactness
+}
+
+// Urgent
+.priority-chip.priority-urgent {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--priority-urgent),
+    label-text-color: var(--priority-urgent-text),
+    with-icon-icon-color: var(--priority-urgent-text),
+    outline-color: transparent,
+  ));
+}
+
+// High
+.priority-chip.priority-high {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--priority-high),
+    label-text-color: var(--priority-high-text),
+    with-icon-icon-color: var(--priority-high-text),
+    outline-color: transparent,
+  ));
+}
+
+// Medium
+.priority-chip.priority-medium {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--priority-medium),
+    label-text-color: var(--priority-medium-text),
+    with-icon-icon-color: var(--priority-medium-text),
+    outline-color: transparent,
+  ));
+}
+
+// Low
+.priority-chip.priority-low {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--priority-low),
+    label-text-color: var(--priority-low-text),
+    with-icon-icon-color: var(--priority-low-text),
+    outline-color: transparent,
+  ));
+}
+
+
+// Material Design list styling - 20% more compact vertically
+.details-list {
   padding: 0;
 
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  mat-list-item {
+    height: auto !important;
+    min-height: 30px !important; // Reduced from 56px (22% reduction)
+    padding: 0 !important;
 
-    &:last-child {
-      border-bottom: none;
+    // Custom wrapper for our two-column layout
+    .list-item-content {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100% !important;
+      min-height: 30px !important; // Reduced from 56px
+      padding: 4px 4px !important; // Reduced from 16px (25% reduction)
+      border-bottom: 1px solid var(--mat-sys-outline-variant) !important;
+    }
+
+    &:last-child .list-item-content {
+      border-bottom: none !important;
     }
 
     .detail-label {
-      font: var(--mat-sys-body-medium);
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--mat-sys-on-surface-variant) !important;
+      font-size: 12px !important; // Reduced from 14px
+      font-weight: 400 !important;
+      margin: 0 !important;
+      flex: 0 0 auto !important;
+      display: flex !important;
+      align-items: center !important;
+      line-height: 1.2 !important; // Tighter line height
     }
 
     .detail-value {
-      font: var(--mat-sys-body-medium);
-      color: var(--mat-sys-on-surface);
-      font-weight: 500;
-      text-align: right;
-
-      &.ticket-id {
-        font-family: 'Courier New', monospace;
-        font-weight: 600;
-      }
-
-      &.age-value {
-        text-align: left;
-      }
-
-      .unassigned-text {
-        color: var(--mat-sys-on-surface-variant);
-        font-style: italic;
+      color: var(--mat-sys-on-surface) !important;
+      font-size: 12px !important; // Reduced from 14px
+      font-weight: 500 !important;
+      margin-right: 8px !important;
+      flex: 1 !important;
+      display: flex !important;
+      justify-content: flex-end !important;
+      align-items: center !important;
+      text-align: right !important;
+      line-height: 1.2 !important; // Tighter line height
+      
+      // Ensure all nested elements are center-aligned
+      > * {
+        display: flex;
+        align-items: center;
       }
     }
-  }
-}
-
-// User Info
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  .user-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font: var(--mat-sys-label-small);
-    font-weight: 600;
-    color: var(--mat-sys-on-primary);
-    flex-shrink: 0;
-
-    &.reporter-avatar {
-      background: var(--mat-sys-tertiary);
-    }
-  }
-
-  .user-name {
-    font: var(--mat-sys-body-medium);
-    color: var(--mat-sys-on-surface);
-  }
-}
-
-// Age Information
-.age-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--mat-sys-on-surface-variant);
-
-  .age-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
-
-  .age-duration {
-    font: var(--mat-sys-body-medium);
-    color: var(--mat-sys-on-surface);
-  }
-}
-
-// Responsive adjustments
-@media (max-width: 767px) {
-  .ticket-summary-card {
-    border-radius: 8px;
-    box-shadow: none;
-    border: 1px solid var(--mat-sys-outline-variant);
-  }
-
-  .summary-header,
-  .summary-details {
-    padding: 1rem;
-  }
-
-  .user-info {
-    .user-avatar {
-      width: 28px;
-      height: 28px;
-      font: var(--mat-sys-label-small);
-    }
-  }
-}
-
-// High contrast mode
-@media (prefers-contrast: high) {
-  .ticket-summary-card {
-    border: 2px solid var(--mat-sys-on-surface);
-  }
-
-  .status-badge,
-  .priority-badge {
-    border: 1px solid currentColor;
   }
 }

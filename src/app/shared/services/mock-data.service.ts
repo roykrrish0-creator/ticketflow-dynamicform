@@ -6,94 +6,114 @@ import {
   Comment, 
   TicketStatus,
   User,
-  TicketTag,
   TicketType
 } from '../models';
 import { HistoryItem } from '../models/history.interface';
 
 /**
- * MockDataService - Centralized service for providing mock data
+ * MockDataService - Pure data provider for development and testing
  * 
- * TODO: Replace this service with actual API services:
- * - TicketService for ticket CRUD operations
- * - CommentService for comment operations  
- * - HistoryService for ticket history
- * - UserService for user data
- * - FormSchemaService for dynamic form schemas
+ * This service ONLY provides mock data. All business logic has been moved to dedicated services:
+ * - CommentService handles comment operations
+ * - HistoryService handles history operations
+ * - TicketService handles ticket operations
+ * 
+ * This service should ONLY contain data creation methods and basic data provision.
+ * NO business logic, state management, or data manipulation should be in this service.
  */
 @Injectable({
   providedIn: 'root'
 })
 export class MockDataService {
 
+  // === PUBLIC DATA PROVISION METHODS ===
+  // These methods provide mock data with simulated delays
+  // Services should use these methods to get mock data
+
   /**
-   * Get ticket by ID
-   * TODO: Replace with actual API call to GET /api/tickets/{id}
+   * Get mock ticket data by ID
    */
-  getTicketById(ticketId: string): Observable<Ticket> {
-    return of(this.createMockTicket(ticketId)).pipe(delay(800));
+  getTicketData(ticketId: string): Observable<Ticket> {
+    console.log('🎫 Loading ticket data with delay...');
+    return of(this.createMockTicket(ticketId)).pipe(delay(2000)); // 2 seconds
   }
 
   /**
-   * Get form schema for ticket
-   * TODO: Replace with actual API call to GET /api/form-schemas/{schemaId}
+   * Get mock form schema data
    */
-  getFormSchema(schemaId: string): Observable<FormSchema> {
-    return of(this.createMockFormSchema()).pipe(delay(600));
+  getFormSchemaData(schemaId: string): Observable<FormSchema> {
+    console.log('📋 Loading form schema with delay...');
+    return of(this.createMockFormSchema()).pipe(delay(1500)); // 1.5 seconds
   }
 
   /**
-   * Get comments for a ticket
-   * TODO: Replace with actual API call to GET /api/tickets/{ticketId}/comments
+   * Get mock comments data for a ticket
    */
-  getTicketComments(ticketId: string): Observable<Comment[]> {
-    return of(this.createMockComments()).pipe(delay(400));
+  getCommentsData(ticketId: string): Observable<Comment[]> {
+    console.log('💬 Loading comments with delay...');
+    return of(this.createMockComments()).pipe(delay(1200)); // 1.2 seconds
   }
 
   /**
-   * Add a new comment to a ticket
-   * TODO: Replace with actual API call to POST /api/tickets/{ticketId}/comments
+   * Get mock history data for a ticket
    */
-  addComment(ticketId: string, commentText: string, isInternal: boolean = false): Observable<Comment> {
-    const newComment = this.createNewComment(commentText, isInternal);
-    return of(newComment).pipe(delay(500));
+  getHistoryData(ticketId: string): Observable<HistoryItem[]> {
+    console.log('📜 Loading history with delay...');
+    return of(this.createMockHistory()).pipe(delay(1000)); // 1 second
   }
 
   /**
-   * Get ticket history
-   * TODO: Replace with actual API call to GET /api/tickets/{ticketId}/history
+   * Get mock current user data
    */
-  getTicketHistory(ticketId: string): Observable<HistoryItem[]> {
-    return of(this.createMockHistory()).pipe(delay(300));
+  getCurrentUserData(): Observable<User> {
+    console.log('👤 Loading current user with delay...');
+    return of(this.createCurrentUser()).pipe(delay(800)); // 0.8 seconds
+  }
+
+  // === HELPER METHODS FOR OTHER SERVICES ===
+  // These methods help other services create new entities with proper structure
+
+  /**
+   * Create a new comment with proper structure (used by CommentService)
+   */
+  createCommentEntity(text: string, isInternal: boolean = false): Comment {
+    return this.createNewComment(text, isInternal);
   }
 
   /**
-   * Save ticket data
-   * TODO: Replace with actual API call to PUT /api/tickets/{ticketId}
+   * Create a new history item with proper structure (used by HistoryService)
    */
-  saveTicket(ticketId: string, formData: any): Observable<Ticket> {
-    // Simulate save operation
-    const updatedTicket = this.createMockTicket(ticketId);
-    updatedTicket.formData = formData;
-    updatedTicket.updatedAt = new Date();
-    return of(updatedTicket).pipe(delay(1000));
+  createNewHistoryItem(ticketId: string, action: string, actor: string, details?: string): HistoryItem {
+    return {
+      id: Date.now(), // Simple ID generation for mock
+      ticketId,
+      action,
+      actor,
+      timestamp: new Date().toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }),
+      details
+    };
   }
 
   /**
-   * Save ticket as draft
-   * TODO: Replace with actual API call to PUT /api/tickets/{ticketId}/draft
+   * Create a new ticket with proper structure (used by TicketService)
    */
-  saveDraft(ticketId: string, formData: any): Observable<void> {
-    // Simulate draft save operation
-    return of(void 0).pipe(delay(500));
-  }
-
-  /**
-   * Get current user information
-   * TODO: Replace with actual API call to GET /api/auth/me
-   */
-  getCurrentUser(): Observable<User> {
-    return of(this.createCurrentUser()).pipe(delay(200));
+  createNewTicket(ticketData: Partial<Ticket>): Ticket {
+    const now = new Date();
+    const baseTicket = this.createMockTicket('temp_id');
+    return {
+      ...baseTicket,
+      ...ticketData,
+      id: ticketData.id || `TICK-${Date.now()}`,
+      createdAt: now,
+      updatedAt: now
+    };
   }
 
   // === PRIVATE MOCK DATA CREATION METHODS ===
@@ -116,26 +136,8 @@ export class MockDataService {
       ticketNumber: 'TICK-2024-001',
       title: 'Employee Onboarding - John Smith',
       description: 'Complete onboarding process for new hire John Smith',
-      status: 'open',
-      statusHistory: [
-        {
-          status: 'open',
-          changedAt: createdDate,
-          changedBy: 'user_001',
-          reason: 'Initial ticket creation'
-        }
-      ],
-      
+      status: 'new',
       priority: 'medium',
-      priorityHistory: [
-        {
-          priority: 'medium',
-          changedAt: createdDate,
-          changedBy: 'user_001',
-          reason: 'Initial priority assignment'
-        }
-      ],
-      
       type: this.createMockTicketType(),
       category: 'hr',
       subcategory: 'onboarding',
@@ -144,77 +146,15 @@ export class MockDataService {
       createdByUser: this.createMockUser('user_001', 'John Doe', 'john.doe@example.com'),
       assignedTo: this.createMockUser('user_002', 'Jane Smith', 'jane.smith@example.com'),
       assignedToId: 'user_002',
-      assignmentHistory: [
-        {
-          assignedTo: 'user_002',
-          assignedAt: createdDate,
-          assignedBy: 'user_001',
-          reason: 'Auto-assigned based on workload'
-        }
-      ],
-      
-      watchers: ['user_003', 'user_004'],
+      reporter: this.createMockUser('user_003', 'Sarah Johnson', 'sarah.johnson@example.com'),
       
       // Timestamps
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       estimatedResolutionTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-      
-      // SLA tracking
-      slaHistory: [
-        {
-          event: 'started',
-          timestamp: createdDate,
-          reason: 'Ticket created and SLA timer started'
-        }
-      ],
-      
-      // Organization and relationships
-      tags: this.createMockTags(),
-      childTicketIds: [],
-      relatedTicketIds: [],
-      duplicates: [],
       
       // Form data
       formData: this.createMockFormData(),
       formSchemaId: 'schema_001',
       formSchemaVersion: '1.0.0',
-      
-      // Metrics
-      metrics: {
-        commentCount: 3,
-        attachmentCount: 2,
-        viewCount: 15,
-        editCount: 2,
-        reopenCount: 0,
-        timeSpentMinutes: 120
-      },
-      
-      // Source and location
-      source: {
-        channel: 'web',
-        origin: 'https://portal.acmecorp.com',
-        userAgent: 'Mozilla/5.0...',
-        ipAddress: '192.168.1.100'
-      },
-      
-      location: {
-        country: 'United States',
-        region: 'New York',
-        city: 'New York',
-        timezone: 'America/New_York'
-      },
-      
-      // Flags
-      flags: {
-        isLocked: false,
-        isArchived: false,
-        isFlagged: false,
-        isUrgent: false,
-        isEscalated: false,
-        isOverdue: false,
-        hasUnreadComments: true,
-        requiresAttention: false
-      },
       
       // Custom fields
       customFields: {
@@ -305,7 +245,7 @@ export class MockDataService {
               placeholder: 'Enter full name',
               validators: [
                 { name: 'required', message: 'Full name is required' },
-                { name: 'minlength', message: 'Name must be at least 2 characters', value: 2 }
+                { name: 'minlength', message: 'Name must be at least 2 characters', args: 2 }
               ]
             },
             {
@@ -561,40 +501,96 @@ export class MockDataService {
         ticketId: 'TICK-2024-001',
         action: 'Ticket Created',
         actor: 'John Doe',
-        timestamp: '2024-01-15 10:30 AM',
-        details: 'Employee onboarding ticket created for John Smith'
+        timestamp: 'Jan 15 10:30 AM',
+        details: 'Employee onboarding ticket created for John Smith. Assigned category: HR, Priority: Medium'
       },
       {
         id: 2,
         ticketId: 'TICK-2024-001',
         action: 'Assigned',
         actor: 'System',
-        timestamp: '2024-01-15 10:31 AM',
-        details: 'Auto-assigned to Jane Smith based on workload distribution'
+        timestamp: 'Jan 15 10:31 AM',
+        details: 'Auto-assigned to Jane Smith based on workload distribution and expertise in employee onboarding processes'
       },
       {
         id: 3,
         ticketId: 'TICK-2024-001',
-        action: 'Document Uploaded',
-        actor: 'Sarah Johnson',
-        timestamp: '2024-01-15 2:15 PM',
-        details: 'Uploaded onboarding_checklist.pdf'
+        action: 'Priority Updated',
+        actor: 'Jane Smith',
+        timestamp: 'Jan 15 11:45 AM',
+        details: 'Priority changed from Medium to High due to start date approaching'
       },
       {
         id: 4,
         ticketId: 'TICK-2024-001',
-        action: 'Status Updated',
-        actor: 'Jane Smith',
-        timestamp: '2024-01-16 9:00 AM',
-        details: 'Status changed from Open to In Progress'
+        action: 'Document Uploaded',
+        actor: 'Sarah Johnson',
+        timestamp: 'Jan 15 2:15 PM',
+        details: 'Uploaded onboarding_checklist.pdf, employee_handbook.pdf, and benefits_enrollment_form.pdf'
       },
       {
         id: 5,
         ticketId: 'TICK-2024-001',
+        action: 'Status Updated',
+        actor: 'Jane Smith',
+        timestamp: 'Jan 16 9:00 AM',
+        details: 'Status changed from New to In Progress. Started processing required documentation and system access setup'
+      },
+      {
+        id: 6,
+        ticketId: 'TICK-2024-001',
         action: 'Comment Added',
         actor: 'Sarah Johnson',
-        timestamp: '2024-01-16 2:30 PM',
-        details: 'Added comment about orientation scheduling'
+        timestamp: 'Jan 16 2:30 PM',
+        details: 'Added comment about orientation scheduling for January 18th at 10:00 AM in Conference Room B'
+      },
+      {
+        id: 7,
+        ticketId: 'TICK-2024-001',
+        action: 'Equipment Requested',
+        actor: 'Mike Chen',
+        timestamp: 'Jan 16 3:45 PM',
+        details: 'IT equipment request submitted: MacBook Pro 16", external monitor, keyboard, and mouse'
+      },
+      {
+        id: 8,
+        ticketId: 'TICK-2024-001',
+        action: 'System Access Granted',
+        actor: 'IT Security Team',
+        timestamp: 'Jan 17 10:15 AM',
+        details: 'Access granted to GitHub, Jira, Confluence, Slack, Google Workspace, and development environment'
+      },
+      {
+        id: 9,
+        ticketId: 'TICK-2024-001',
+        action: 'Form Updated',
+        actor: 'HR Department',
+        timestamp: 'Jan 17 1:20 PM',
+        details: 'Employee details form updated with final employment terms and workspace assignment (Desk #42)'
+      },
+      {
+        id: 10,
+        ticketId: 'TICK-2024-001',
+        action: 'Equipment Ready',
+        actor: 'IT Support',
+        timestamp: 'Jan 17 4:00 PM',
+        details: 'All requested equipment has been configured and is ready for pickup. Setup includes development tools and VPN access'
+      },
+      {
+        id: 11,
+        ticketId: 'TICK-2024-001',
+        action: 'Welcome Package Prepared',
+        actor: 'Reception Team',
+        timestamp: 'Jan 18 8:30 AM',
+        details: 'Welcome package prepared including company swag, office keys, parking pass, and first-day schedule'
+      },
+      {
+        id: 12,
+        ticketId: 'TICK-2024-001',
+        action: 'Comment Added',
+        actor: 'John Smith',
+        timestamp: '30 minutes ago',
+        details: 'Looking forward to starting! Question about parking arrangements has been answered. Ready for orientation'
       }
     ];
   }
@@ -626,13 +622,7 @@ export class MockDataService {
       avatar: 'https://via.placeholder.com/40',
       roles: ['user', 'agent'],
       department: 'Engineering',
-      isActive: true,
-      preferences: {
-        notifications: true,
-        emailUpdates: true,
-        theme: 'light' as const,
-        language: 'en'
-      }
+      isActive: true
     };
   }
 
@@ -655,13 +645,7 @@ export class MockDataService {
       avatar: 'https://via.placeholder.com/40',
       roles: ['user'],
       department: 'HR',
-      isActive: true,
-      preferences: {
-        notifications: true,
-        emailUpdates: true,
-        theme: 'light' as const,
-        language: 'en'
-      }
+      isActive: true
     };
   }
 
@@ -678,58 +662,10 @@ export class MockDataService {
       icon: 'person_add',
       color: '#4CAF50',
       isActive: true,
-      formSchemaId: 'schema_001',
-      workflow: {
-        initialStatus: 'open' as TicketStatus,
-        allowedTransitions: [
-          {
-            from: 'open' as TicketStatus,
-            to: ['in_progress' as TicketStatus, 'closed' as TicketStatus],
-            conditions: {},
-            requiredPermissions: ['ticket.update']
-          }
-        ]
-      }
+      formSchemaId: 'schema_001'
     };
   }
 
-  private createMockTags(): TicketTag[] {
-    const now = new Date();
-    return [
-      {
-        id: 'tag_001',
-        createdAt: now,
-        createdBy: 'system',
-        updatedAt: now,
-        version: 1,
-        name: 'urgent',
-        slug: 'urgent',
-        color: '#ff6b6b',
-        backgroundColor: '#ffebee',
-        textColor: '#d32f2f',
-        description: 'Urgent priority ticket',
-        isSystemTag: true,
-        sortOrder: 1,
-        usageCount: 45
-      },
-      {
-        id: 'tag_002',
-        createdAt: now,
-        createdBy: 'system',
-        updatedAt: now,
-        version: 1,
-        name: 'customer-facing',
-        slug: 'customer-facing',
-        color: '#4ecdc4',
-        backgroundColor: '#e0f7fa',
-        textColor: '#00695c',
-        description: 'Customer facing ticket',
-        isSystemTag: false,
-        sortOrder: 2,
-        usageCount: 23
-      }
-    ];
-  }
 
   private createMockFormData(): any {
     return {

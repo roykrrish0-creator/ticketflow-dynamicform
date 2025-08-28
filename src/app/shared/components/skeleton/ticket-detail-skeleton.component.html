@@ -1,0 +1,322 @@
+<div class="bg-gray-50 min-h-screen">
+  
+  <!-- Ticket Header Skeleton -->
+  <mat-card class="ticket-header-card mat-elevation-z4" appearance="outlined">
+    <mat-card-content class="header-card-content">
+      <!-- Back Button -->
+      <div class="skeleton back-button-skeleton"></div>
+      
+      <!-- Main Header Content -->
+      <div class="header-content">
+        <div class="header-title">
+          <div class="skeleton skeleton-title"></div>
+        </div>
+        <div class="header-meta">
+          <!-- Status Chip -->
+          <div class="skeleton skeleton-chip"></div>
+          <div class="skeleton skeleton-date"></div>
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <div class="skeleton skeleton-button"></div>
+        <div class="skeleton skeleton-button-primary"></div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Main Layout Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_210px] xl:grid-cols-[1fr_280px] gap-6 min-h-0 p-6">
+    
+    <!-- Form Section (Left Panel) -->
+    <div class="bg-gray-50 min-h-0">
+      <div class="flex flex-col gap-4">
+        
+        <!-- First Form Section - Expanded -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <mat-expansion-panel [expanded]="true" class="shadow-none">
+            <mat-expansion-panel-header class="section-header">
+              <mat-panel-title class="section-title">
+                <div class="skeleton skeleton-icon"></div>
+                <div class="skeleton skeleton-section-title"></div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            
+            <!-- Section Content with 8 fields -->
+            <div class="section-content">
+              <div class="form-grid">
+                <!-- Row 1: 2 fields -->
+                <div class="form-field-container">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-input"></div>
+                </div>
+                <div class="form-field-container">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-input"></div>
+                </div>
+                
+                <!-- Row 2: 2 fields -->
+                <div class="form-field-container">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-input"></div>
+                </div>
+                <div class="form-field-container">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-input"></div>
+                </div>
+                
+                <!-- Row 3: Full width field (textarea) -->
+                <div class="form-field-container full-width">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-textarea"></div>
+                </div>
+                
+                <!-- Row 4: 2 fields -->
+                <div class="form-field-container">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-input"></div>
+                </div>
+                <div class="form-field-container">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-input"></div>
+                </div>
+                
+                <!-- Row 5: 1 field (8th field) -->
+                <div class="form-field-container">
+                  <div class="skeleton skeleton-field-label"></div>
+                  <div class="skeleton skeleton-field-input"></div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </div>
+        
+        <!-- Additional collapsed sections -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <mat-expansion-panel [expanded]="false" class="shadow-none">
+            <mat-expansion-panel-header class="section-header">
+              <mat-panel-title class="section-title">
+                <div class="skeleton skeleton-icon"></div>
+                <div class="skeleton skeleton-section-title"></div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+          </mat-expansion-panel>
+        </div>
+        
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <mat-expansion-panel [expanded]="false" class="shadow-none">
+            <mat-expansion-panel-header class="section-header">
+              <mat-panel-title class="section-title">
+                <div class="skeleton skeleton-icon"></div>
+                <div class="skeleton skeleton-section-title"></div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+          </mat-expansion-panel>
+        </div>
+        
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <mat-expansion-panel [expanded]="false" class="shadow-none">
+            <mat-expansion-panel-header class="section-header">
+              <mat-panel-title class="section-title">
+                <div class="skeleton skeleton-icon"></div>
+                <div class="skeleton skeleton-section-title"></div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+          </mat-expansion-panel>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Summary Section (Right Panel) -->
+    <div class="bg-white w-full h-fit max-h-[calc(100vh-200px)] lg:sticky lg:top-6">
+      <mat-card class="summary-card">
+        <mat-card-header class="summary-header">
+          <div class="skeleton skeleton-summary-title"></div>
+        </mat-card-header>
+        
+        <mat-card-content class="summary-content">
+          <!-- Key information -->
+          <div class="summary-items">
+            <div class="summary-item">
+              <div class="skeleton skeleton-summary-label"></div>
+              <div class="skeleton skeleton-summary-value"></div>
+            </div>
+            <div class="summary-item">
+              <div class="skeleton skeleton-summary-label"></div>
+              <div class="skeleton skeleton-summary-value"></div>
+            </div>
+            <div class="summary-item">
+              <div class="skeleton skeleton-summary-label"></div>
+              <div class="skeleton skeleton-summary-value"></div>
+            </div>
+            <div class="summary-item">
+              <div class="skeleton skeleton-summary-label"></div>
+              <div class="skeleton skeleton-summary-value"></div>
+            </div>
+            <div class="summary-item">
+              <div class="skeleton skeleton-summary-label"></div>
+              <div class="skeleton skeleton-summary-value"></div>
+            </div>
+            <div class="summary-item">
+              <div class="skeleton skeleton-summary-label"></div>
+              <div class="skeleton skeleton-summary-value"></div>
+            </div>
+          </div>
+          
+          <!-- Progress section -->
+          <div class="summary-progress">
+            <div class="skeleton skeleton-progress-label"></div>
+            <div class="skeleton skeleton-progress-bar"></div>
+            <div class="progress-text">
+              <div class="skeleton skeleton-progress-start"></div>
+              <div class="skeleton skeleton-progress-end"></div>
+            </div>
+          </div>
+          
+          <!-- Tags section -->
+          <div class="summary-tags">
+            <div class="skeleton skeleton-tags-label"></div>
+            <div class="tags-container">
+              <div class="skeleton skeleton-tag"></div>
+              <div class="skeleton skeleton-tag"></div>
+              <div class="skeleton skeleton-tag"></div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Bottom Tabs Section -->
+  <div class="bg-white border border-gray-200 m-6 rounded-xl shadow-sm overflow-hidden h-fit">
+    <mat-tab-group class="ticket-tabs min-h-[400px]">
+      
+      <!-- Comments Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <div class="tab-label">
+            <span>Comments</span>
+            <div class="skeleton skeleton-tab-count"></div>
+          </div>
+        </ng-template>
+        
+        <div class="tab-content">
+          <!-- Comment input area -->
+          <div class="comment-composer">
+            <div class="comment-input">
+              <div class="skeleton skeleton-avatar-small"></div>
+              <div class="skeleton skeleton-comment-input"></div>
+            </div>
+            <div class="comment-actions">
+              <div class="skeleton skeleton-comment-button"></div>
+            </div>
+          </div>
+          
+          <!-- Comments list -->
+          <div class="comments-list">
+            <div class="comment-item">
+              <div class="skeleton skeleton-avatar-small"></div>
+              <div class="comment-content">
+                <div class="comment-meta">
+                  <div class="skeleton skeleton-comment-author"></div>
+                  <div class="skeleton skeleton-comment-time"></div>
+                </div>
+                <div class="skeleton skeleton-comment-text"></div>
+                <div class="skeleton skeleton-comment-text-short"></div>
+              </div>
+            </div>
+            
+            <div class="comment-item">
+              <div class="skeleton skeleton-avatar-small"></div>
+              <div class="comment-content">
+                <div class="comment-meta">
+                  <div class="skeleton skeleton-comment-author"></div>
+                  <div class="skeleton skeleton-comment-time"></div>
+                </div>
+                <div class="skeleton skeleton-comment-text"></div>
+              </div>
+            </div>
+            
+            <div class="comment-item">
+              <div class="skeleton skeleton-avatar-small"></div>
+              <div class="comment-content">
+                <div class="comment-meta">
+                  <div class="skeleton skeleton-comment-author"></div>
+                  <div class="skeleton skeleton-comment-time"></div>
+                </div>
+                <div class="skeleton skeleton-comment-text"></div>
+                <div class="skeleton skeleton-comment-text-short"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+      
+      <!-- History Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <div class="tab-label">
+            <span>History</span>
+            <div class="skeleton skeleton-tab-count"></div>
+          </div>
+        </ng-template>
+        
+        <div class="tab-content">
+          <div class="history-list">
+            <div class="history-item">
+              <div class="skeleton skeleton-history-icon"></div>
+              <div class="history-content">
+                <div class="history-header">
+                  <div class="skeleton skeleton-history-action"></div>
+                  <div class="skeleton skeleton-history-time"></div>
+                </div>
+                <div class="skeleton skeleton-history-actor"></div>
+                <div class="skeleton skeleton-history-details"></div>
+              </div>
+            </div>
+            
+            <div class="history-item">
+              <div class="skeleton skeleton-history-icon"></div>
+              <div class="history-content">
+                <div class="history-header">
+                  <div class="skeleton skeleton-history-action"></div>
+                  <div class="skeleton skeleton-history-time"></div>
+                </div>
+                <div class="skeleton skeleton-history-actor"></div>
+                <div class="skeleton skeleton-history-details"></div>
+              </div>
+            </div>
+            
+            <div class="history-item">
+              <div class="skeleton skeleton-history-icon"></div>
+              <div class="history-content">
+                <div class="history-header">
+                  <div class="skeleton skeleton-history-action"></div>
+                  <div class="skeleton skeleton-history-time"></div>
+                </div>
+                <div class="skeleton skeleton-history-actor"></div>
+                <div class="skeleton skeleton-history-details"></div>
+              </div>
+            </div>
+            
+            <div class="history-item">
+              <div class="skeleton skeleton-history-icon"></div>
+              <div class="history-content">
+                <div class="history-header">
+                  <div class="skeleton skeleton-history-action"></div>
+                  <div class="skeleton skeleton-history-time"></div>
+                </div>
+                <div class="skeleton skeleton-history-actor"></div>
+                <div class="skeleton skeleton-history-details"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+      
+    </mat-tab-group>
+  </div>
+
+</div>

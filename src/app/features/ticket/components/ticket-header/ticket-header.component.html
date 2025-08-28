@@ -1,0 +1,76 @@
+<!-- Header section using Material Card -->
+<mat-card class="ticket-header-card mat-elevation-z4" appearance="outlined">
+  <mat-card-content class="header-card-content">
+    <!-- Back Button -->
+    <button mat-button routerLink="/tickets" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Tickets
+    </button>
+    
+    <!-- Main Header Content -->
+    <div class="header-content">
+      <div class="header-title">
+        {{ title() }}
+      </div>
+      <div class="header-meta">
+        <!-- Status Chip using Material Chip -->
+        <mat-chip [ngClass]="statusClass()" class="status-chip">
+          <mat-icon matChipAvatar>{{ statusIcon() }}</mat-icon>{{ statusLabel() }}</mat-chip>
+        <span class="created-date">{{ createdDate() }}</span>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="header-actions">
+      <!-- Reassign Button -->
+      <button mat-stroked-button (click)="onReassign()">
+        <mat-icon>person_add</mat-icon>
+        Reassign
+      </button>
+      
+      <!-- Read-only Mode -->
+      @if (!isEditMode) {
+        <button mat-flat-button 
+                color="primary" 
+                (click)="onEnterEditMode()">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+      }
+      
+      <!-- Edit Mode -->
+      @if (isEditMode) {
+        <div class="edit-actions">
+          <!-- Primary Save Button -->
+          <button mat-flat-button 
+                  color="primary"
+                  [disabled]="!canSave || isSaving"
+                  (click)="onSaveChanges()">
+            @if (!isSaving) {
+              <mat-icon>save</mat-icon>
+            }
+            @if (isSaving) {
+              <mat-icon>sync</mat-icon>
+            }
+            {{ isSaving ? 'Saving...' : 'Save changes' }}
+          </button>
+          
+          <!-- Options Menu -->
+          <button mat-icon-button 
+                  [matMenuTriggerFor]="optionsMenu"
+                  [disabled]="isSaving"
+                  aria-label="More options">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          
+          <mat-menu #optionsMenu="matMenu">
+            <button mat-menu-item (click)="onCancel()">
+              <mat-icon>cancel</mat-icon>
+              Cancel changes
+            </button>
+          </mat-menu>
+        </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

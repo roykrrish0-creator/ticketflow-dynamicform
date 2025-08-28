@@ -53,9 +53,9 @@ export abstract class BaseFieldComponent {
       case 'max':
         return `${this.field.label} must be less than maximum value`;
       case 'minlength':
-        return `${this.field.label} must be at least ${validator?.value} characters`;
+        return `${this.field.label} must be at least ${validator?.args} characters`;
       case 'maxlength':
-        return `${this.field.label} must not exceed ${validator?.value} characters`;
+        return `${this.field.label} must not exceed ${validator?.args} characters`;
       default:
         return `${this.field.label} is invalid`;
     }
@@ -79,7 +79,7 @@ export abstract class BaseFieldComponent {
    * Get field hint text
    */
   get hint(): string {
-    return this.field.attributes?.hint || '';
+    return this.field.attributes?.['hint'] || '';
   }
 
   /**

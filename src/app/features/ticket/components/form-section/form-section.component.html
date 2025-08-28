@@ -30,7 +30,7 @@
               [readonly]="field.readOnly"
               [type]="getInputType(field)"
               [attr.autocomplete]="getFieldAttribute(field, 'autocomplete')">
-            @if (field.attributes?.hint) {
+            @if (getFieldAttribute(field, 'hint')) {
             <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
             }
             @if (hasFieldError(field.id, 'required')) {
@@ -69,11 +69,11 @@
               matInput 
               [formControlName]="field.id"
               [placeholder]="field.placeholder || ''"
-              [rows]="field.attributes?.rows || 3"
+              [rows]="getFieldAttribute(field, 'rows') || 3"
               [readonly]="field.readOnly"
               [attr.maxlength]="getFieldAttribute(field, 'maxlength')">
             </textarea>
-            @if (field.attributes?.hint) {
+            @if (getFieldAttribute(field, 'hint')) {
             <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
             }
             @if (hasFieldError(field.id, 'required')) {
@@ -107,7 +107,7 @@
               </mat-option>
               }
             </mat-select>
-            @if (field.attributes?.hint) {
+            @if (getFieldAttribute(field, 'hint')) {
             <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
             }
             @if (hasFieldError(field.id, 'required')) {
@@ -135,7 +135,7 @@
               </mat-radio-button>
               }
             </mat-radio-group>
-            @if (field.attributes?.hint) {
+            @if (getFieldAttribute(field, 'hint')) {
             <div class="field-hint">{{ getFieldAttribute(field, 'hint') }}</div>
             }
             @if (hasFieldError(field.id, 'required')) {
@@ -159,7 +159,7 @@
               [min]="getFieldAttribute(field, 'min')"
               [max]="getFieldAttribute(field, 'max')"
               [step]="getFieldAttribute(field, 'step')">
-            @if (field.attributes?.hint) {
+            @if (getFieldAttribute(field, 'hint')) {
             <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
             }
             @if (hasFieldError(field.id, 'required')) {
@@ -195,7 +195,7 @@
               [max]="getFieldAttribute(field, 'max')">
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
-            @if (field.attributes?.hint) {
+            @if (getFieldAttribute(field, 'hint')) {
             <mat-hint>{{ getFieldAttribute(field, 'hint') }}</mat-hint>
             }
             @if (hasFieldError(field.id, 'required')) {
@@ -224,7 +224,7 @@
               [disabled]="isFieldDisabled(field)">
               {{ field.label }}
             </mat-checkbox>
-            @if (field.attributes?.hint) {
+            @if (getFieldAttribute(field, 'hint')) {
             <div class="field-hint">{{ getFieldAttribute(field, 'hint') }}</div>
             }
           </div>

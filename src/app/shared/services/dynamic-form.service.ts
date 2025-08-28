@@ -26,38 +26,10 @@ export class DynamicFormService {
   private readonly defaultConfig: DynamicFormConfig = {
     validation: {
       mode: 'onChange',
-      debounceTime: 300,
-      showInlineErrors: true,
-      showSummary: true,
-      scrollToFirstError: true,
-      highlightInvalidFields: true
-    },
-    autoSave: {
-      enabled: false,
-      interval: 5000,
-      showIndicator: true,
-      onlyIfValid: false
+      debounceTime: 300
     },
     conditionalLogic: {
-      enabled: true,
-      animateTransitions: false,
-      evaluationMode: 'lazy',
-      debugMode: false
-    },
-    ui: {
-      theme: 'light',
-      density: 'comfortable',
-      showProgress: true,
-      showFieldNumbers: false,
-      showRequiredIndicator: true,
-      focusFirstField: true
-    },
-    localization: {
-      locale: 'en-US',
-      dateFormat: 'MM/dd/yyyy',
-      numberFormat: 'en-US',
-      currency: 'USD',
-      timezone: 'America/New_York'
+      enabled: true
     }
   };
 
@@ -113,35 +85,20 @@ export class DynamicFormService {
    * Creates a form control for a field
    */
   private createFieldControl(field: FormField): AbstractControl {
-    let control: AbstractControl;
-
-    switch (field.type) {
-      case 'group':
-        control = this.fb.group({});
-        field.children?.forEach(child => {
-          const childControl = this.createFieldControl(child);
-          (control as FormGroup).addControl(child.id, childControl);
-        });
-        break;
-
-      default:
-        const initialValue = field.default ?? this.getDefaultValueForType(field.type);
-        const isDisabled = field.disabled || field.readOnly;
-        if (isDisabled) {
-          control = this.fb.control(
-            { value: initialValue, disabled: true },
-            { validators: this.createValidators(field) }
-          );
-        } else {
-          control = this.fb.control(
-            initialValue,
-            { validators: this.createValidators(field) }
-          );
-        }
-        break;
+    const initialValue = field.default ?? this.getDefaultValueForType(field.type);
+    const isDisabled = field.disabled || field.readOnly;
+    
+    if (isDisabled) {
+      return this.fb.control(
+        { value: initialValue, disabled: true },
+        { validators: this.createValidators(field) }
+      );
+    } else {
+      return this.fb.control(
+        initialValue,
+        { validators: this.createValidators(field) }
+      );
     }
-
-    return control;
   }
 
   /**
@@ -157,8 +114,6 @@ export class DynamicFormService {
       case 'radio':
         return null;
       case 'date':
-        return null;
-      case 'file':
         return null;
       default:
         return '';
@@ -194,11 +149,6 @@ export class DynamicFormService {
         case 'maxlength':
           if (typeof validator.args === 'number') {
             validators.push(Validators.maxLength(validator.args));
-          }
-          break;
-        case 'pattern':
-          if (typeof validator.args === 'string' || validator.args instanceof RegExp) {
-            validators.push(Validators.pattern(validator.args));
           }
           break;
         case 'email':
@@ -249,20 +199,14 @@ export class DynamicFormService {
   }
 
   /**
-   * Collects nested conditional fields (for group fields)
+   * Collects nested conditional fields (placeholder for future use)
    */
   private collectNestedConditionalFields(
     field: FormField,
     conditionalFields: { [key: string]: FormField }
   ): void {
-    if (field.children) {
-      field.children.forEach(child => {
-        if (child.visibleWhen) {
-          conditionalFields[child.id] = child;
-        }
-        this.collectNestedConditionalFields(child, conditionalFields);
-      });
-    }
+    // No nested fields to collect since we removed group fields
+    // This method is kept for future extensibility
   }
 
   /**

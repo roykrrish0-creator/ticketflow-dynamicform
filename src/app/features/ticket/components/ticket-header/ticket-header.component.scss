@@ -1,0 +1,154 @@
+// Status chip colors using styles.scss variables with optimized text colors
+@use "@angular/material" as mat;
+
+// Minimal SCSS using Angular Material Card components
+.ticket-header-card {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  margin-bottom: 1rem;
+  border-radius:8px;
+  
+  // Add elevation with shadow at bottom
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.header-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem !important;
+  min-height: 64px;
+}
+
+
+
+// Base custom chip class
+.status-chip {
+  border-radius: 9999px;
+  font-weight: 200;
+  height: 18px !important; // Fixed height for compactness
+}
+
+// New
+.status-chip.status-new {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-new),
+    label-text-color: var(--status-new-text),
+    with-icon-icon-color: var(--status-new-text),
+     outline-color: transparent,
+  ));
+}
+
+// Assigned
+.status-chip.status-assigned {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-assigned),
+    label-text-color: var(--status-assigned-text),
+    with-icon-icon-color: var(--status-assigned-text),
+  ));
+}
+
+// In Progress
+.status-chip.status-in-progress {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-in-progress),
+    label-text-color: var(--status-in-progress-text),
+    with-icon-icon-color: var(--status-in-progress-text),
+  ));
+}
+
+// Manual Review
+.status-chip.status-manual-review {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-manual_review),
+    label-text-color: var(--status-manual_review-text),
+    with-icon-icon-color: var(--status-manual_review-text),
+  ));
+}
+
+// Completed
+.status-chip.status-completed {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-completed),
+    label-text-color: var(--status-completed-text),
+    with-icon-icon-color: var(--status-completed-text),
+  ));
+}
+
+// Failed
+.status-chip.status-failed {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--status-failed),
+    label-text-color: var(--status-failed-text),
+    with-icon-icon-color: var(--status-failed-text),
+  ));
+}
+
+
+.back-button {
+  flex-shrink: 0;
+}
+
+.header-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0 1rem;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.header-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--mat-sys-on-surface);
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.created-date {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .header-card-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1rem !important;
+  }
+  
+  .header-content {
+    margin: 0;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .header-actions {
+    justify-content: center;
+  }
+}
